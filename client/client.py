@@ -3,37 +3,43 @@
 import socket
 import threading
 
-def user_input(connection):
-    while True:
-        text = input()
-        connection.sendall(text.encode())
+class Client():
+    def __init__(self):
+        pass
 
-def cmd_handler(connection):
-    while True:
-        data = connection.recv(1024)
+    def connect(self, HOST, PORT):
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        msg_list = data.decode().split('\n')
+        self._socket.connect((HOST, PORT))
 
-        for msg in msg_list:
-            if msg == "shutdown":
-                break
-            elif msg == "user_id":
-                user_id = input("ID: ")
-                connection.sendall(f"user_id: {user_id}".encode())
-            elif msg == "passwd":
-                passwd = input("密碼: ")
-                connection.sendall(f"passwd: {passwd}".encode())
-            elif msg == "login_ok":
-                threading.Thread(target=user_input, args=(connection,)).start()
-            else:
-                print(msg)
+        threading.Thread(target=self._handler, args=()).start()
 
-def client(HOST, PORT):
-    connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def _user_input(self):
+        while True:
+            text = input()
+            self._socket.sendall(text.encode())
 
-    connection.connect((HOST, PORT))
+    def _handler(self):
+        while True:
+            data = self._socket.recv(1024)
 
-    threading.Thread(target=cmd_handler, args=(connection,)).start()
+            msg_list = data.decode().split('\n')
+
+            for msg in msg_list:
+                if msg == "shutdown":
+                    break
+                elif msg == "user_id":
+                    user_id = input("ID: ")
+                    self._socket.sendall(f"user_id: {user_id}".encode())
+                elif msg == "passwd":
+                    passwd = input("密碼: ")
+                    self._socket.sendall(f"passwd: {passwd}".encode())
+                elif msg == "login_ok":
+                    threading.Thread(target=self._user_input, args=()).start()
+                else:
+                    print(msg)
 
 if __name__ == "__main__":
-    client("127.0.0.1", 4004)
+    client = Client()
+
+    client.connect("127.0.0.1", 4004)
