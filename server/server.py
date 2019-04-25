@@ -1,75 +1,42 @@
 
 import selectors
 import socket
-import types
+
+from guest.guest import Guest
+from protocol.message import Message
 
 class Serverlet:
     def __init__(self):
-        self._users = []
+        self._guests = []
         self._multiplexer = selectors.DefaultSelector()
+        self._text_handlers = {
+            "sign_in": self._sign_in,
+            "user": self._msg_chat
+        }
 
-    def _reception(self, socket):
-        connection, address = socket.accept()  # Should be ready to read
+    def on_socket(self, server_socket, mask):
+        connection, address = server_socket.accept()  # Should be ready to read
         print(f"Connected by: {address}")
 
         connection.setblocking(False)
 
-        user = types.SimpleNamespace(
-            address=address,
-            id="anonymous",
-            in_buffer=b'',
-            out_buffer=b''
-        )
+        mask = selectors.EVENT_READ | selectors.EVENT_WRITE
 
-        events = selectors.EVENT_READ | selectors.EVENT_WRITE
-        self._multiplexer.register(connection, events, data=user)
+        guest = Guest()
 
-        self._users.append(user)
+        self._multiplexer.register(connection, mask, guest)
 
-        user.out_buffer += (
-            f"歡迎來到 MUTE: Multi-User Texting Environment\nuser_id".encode()
-        )
+        self._guests.append(guest)
 
-    def _handler(self, io, mask):
-        connection = io.fileobj
-        user = io.data
+        guest.send_msg(Message(
+            "system",
+            sender="MUTE",
+            content=f"歡迎來到 MUTE: Multi-User Texting Environment"
+        ))
 
-        if mask & selectors.EVENT_READ:
-            user.in_buffer = connection.recv(1024)
-
-            if user.in_buffer:
-                cmd = user.in_buffer.decode().split(":")
-
-                if cmd[0] == "user_id":
-                    user.id = cmd[1].strip()
-
-                    user.out_buffer += f"passwd".encode()
-                elif cmd[0] == "passwd":
-                    user.out_buffer += f"login_ok\nMUTE 說: 登入成功!\n".encode()
-                    for usr in self._users:
-                        usr.out_buffer += (
-                            f"MUTE 說：使用者 {user.id} 進入 MUTE。".encode()
-                        )
-                else:
-                    message = (
-                        f"{user.id} 說： ".encode() + user.in_buffer
-                    )
-
-                    for usr in self._users:
-                        usr.out_buffer += message
-            else:
-                print(f"closing connection to {data.address}")
-                self._multiplexer.unregister(connection)
-                connection.close()
-
-        if mask & selectors.EVENT_WRITE:
-            if user.out_buffer:
-                print(f"client {user.address}: {user.out_buffer.decode()}")
-
-                sent = connection.send(user.out_buffer)
-                user.out_buffer = user.out_buffer[sent:]
-
-        return user.in_buffer.decode()
+        guest.send_msg(Message(
+            "sign_in"
+        ))
 
     def start(self, HOST, PORT):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSocket:
@@ -78,7 +45,7 @@ class Serverlet:
             serverSocket.listen()
 
             self._multiplexer.register(
-                serverSocket, selectors.EVENT_READ, data=None
+                serverSocket, selectors.EVENT_READ, self
             )
 
             print(f"MUTE server start listening at {HOST}:{PORT}")
@@ -87,13 +54,30 @@ class Serverlet:
                 events = self._multiplexer.select(timeout=None)
 
                 for io, mask in events:
-                    if io.data is None:
-                        self._reception(io.fileobj)
-                    else:
-                        cmd = self._handler(io, mask).split(":")
+                    io.data.on_socket(io.fileobj, mask)
 
-                        if cmd[0] == "shutdown":
-                            exit()
+                for guest in self._guests:
+                    for msg in guest.msg_in:
+                        print(f"{guest.user}: {msg}")
+
+                        if msg.text in self._text_handlers:
+                            self._text_handlers[msg.text](guest, **msg.args)
+
+                    guest.msg_in = []
+
+    def _msg_chat(self, sender, **kwargs):
+        for guest in self._guests:
+            guest.send_msg(Message(
+                "chat",
+                sender=sender.user,
+                content=kwargs["content"]
+            ))
+
+    def _sign_in(self, guest, **kwargs):
+        print(f"id: {kwargs['user_id']} passwd {kwargs['passwd']}")
+        guest.set_user(kwargs["user_id"])
+
+        guest.send_msg(Message("welcome"))
 
 if __name__ == "__main__":
     serverlet = Serverlet()
