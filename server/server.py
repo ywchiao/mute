@@ -5,13 +5,15 @@ import socket
 from guest.guest import Guest
 from protocol.message import Message
 
+from logcat.logcat import LogCat
+
 class Serverlet:
     def __init__(self):
         self._guests = []
         self._multiplexer = selectors.DefaultSelector()
-        self._text_handlers = {
-            "sign_in": self._sign_in,
-            "user": self._msg_chat
+        self._handlers = {
+            Message.CHAT: self._on_msg_chat,
+            Message.SIGN_IN: self._on_sign_in
         }
 
     def on_socket(self, server_socket, mask):
@@ -28,15 +30,17 @@ class Serverlet:
 
         self._guests.append(guest)
 
-        guest.send_msg(Message(
-            "system",
-            sender="MUTE",
-            content=f"歡迎來到 MUTE: Multi-User Texting Environment"
-        ))
+        guest.send_msg(
+            Message(
+                Message.SYSTEM,
+                who="MUTE",
+                text=f"歡迎來到 MUTE: Multi-User Texting Environment"
+            )
+        )
 
-        guest.send_msg(Message(
-            "sign_in"
-        ))
+        guest.send_msg(
+            Message(Message.SIGN_IN)
+        )
 
     def start(self, HOST, PORT):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as serverSocket:
@@ -48,6 +52,7 @@ class Serverlet:
                 serverSocket, selectors.EVENT_READ, self
             )
 
+            LogCat.log(f"MUTE server start listening at {HOST}:{PORT}")
             print(f"MUTE server start listening at {HOST}:{PORT}")
 
             while True:
@@ -60,26 +65,41 @@ class Serverlet:
                     for msg in guest.msg_in:
                         print(f"{guest.user}: {msg}")
 
-                        if msg.text in self._text_handlers:
-                            self._text_handlers[msg.text](guest, **msg.args)
+                        if msg.type in self._handlers:
+                            self._handlers[msg.type](guest, **msg.kwargs)
 
                     guest.msg_in = []
 
-    def _msg_chat(self, sender, **kwargs):
-        for guest in self._guests:
-            guest.send_msg(Message(
-                "chat",
-                sender=sender.user,
-                content=kwargs["content"]
-            ))
+    def _on_msg_chat(self, from_who, who, text):
+        LogCat.log(f"_on_msg_chat: from- {from_who} who- {who} text- {text}")
 
-    def _sign_in(self, guest, **kwargs):
+        for guest in self._guests:
+            guest.send_msg(
+                Message(
+                    Message.CHAT,
+                    who=who,
+                    text=text
+                )
+            )
+
+    def _on_sign_in(self, guest, **kwargs):
+        LogCat.log(f"id: {kwargs['user_id']} passwd {kwargs['passwd']}")
         print(f"id: {kwargs['user_id']} passwd {kwargs['passwd']}")
+
         guest.set_user(kwargs["user_id"])
 
-        guest.send_msg(Message("welcome"))
+        guest.send_msg(
+            Message(
+                Message.WELCOME,
+                who="MUTE",
+                guest=kwargs["user_id"],
+                text="welcome"
+            )
+        )
 
 if __name__ == "__main__":
     serverlet = Serverlet()
 
     serverlet.start("127.0.0.1", 4004)
+
+# server.py

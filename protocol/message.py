@@ -2,18 +2,28 @@
 
 import json
 
-class Message():
-    def __init__(self, text="noop", **kwargs):
-        self.text = text
-        self.args = kwargs
+class Message:
+    CHAT = "chat"
+    SIGN_IN = "sign_in"
+    SYSTEM = "system"
+    WELCOME = "welcome"
+
+    def __init__(self, type_="noop", **kwargs):
+        self._type = type_
+        self._kwargs = kwargs
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def kwargs(self):
+        return self._kwargs
 
     def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
         return json.dumps({
-            'text': self.text,
-            'args': self.args
+            'type': self._type,
+            'kwargs': self._kwargs
         })
 
 if __name__ == "__main__":
@@ -22,3 +32,5 @@ if __name__ == "__main__":
     print(msg)
     print(msg.type)
     print(msg.text)
+
+# message.py

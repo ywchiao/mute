@@ -23,7 +23,7 @@ class NetIO():
                 )
 
                 msg.append(
-                    Message(msg_json["text"], **msg_json["args"])
+                    Message(msg_json["type"], **msg_json["kwargs"])
                 )
 
                 self._in_buffer = self._in_buffer[msg_len+4:]
@@ -38,3 +38,5 @@ class NetIO():
         socket.sendall(
             struct.pack(">I", len(msg_stream)) + msg_stream
         )
+
+# net_io.py
