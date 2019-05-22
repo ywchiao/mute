@@ -1,0 +1,22 @@
+{
+  "name": "Muted",
+  "socket": {
+    "ip": "127.0.0.1",
+    "port": 4004
+  },
+  "root": {
+    "data": "./.muted/data",
+    "log": "./.muted/log"
+  },
+  "data": {
+    "brief": "brief",
+    "desc": "desc",
+    "name": "name",
+    "role": "role",
+    "room": "room"
+  },
+  "log": {
+    "config": "config.json",
+    "file": "muted.log"
+  }
+}

@@ -1,0 +1,14 @@
+
+class Color:
+    BACKGROUND = 236
+    FOREGROUND = 195
+    BUTTON_BACKGROUND = 66
+    FIELD_BACKGROUND = 238 #241
+    SCROLL_BAR_BACKGROUND = 242
+
+    TEXT = 1
+    INPUT_FIELD = 2
+    SCROLL_BAR = 3
+    BUTTON = 4
+
+# color.py

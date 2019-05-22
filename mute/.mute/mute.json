@@ -1,0 +1,14 @@
+{
+  "name": "Mute",
+  "socket": {
+    "ip": "127.0.0.1",
+    "port": 4004
+  },
+  "root": {
+    "log": "./.mute/log"
+  },
+  "log": {
+    "config": "config.json",
+    "file": "mute.log"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "default": {
+      "format": "[%(asctime)s:%(msecs)d] [%(levelname)s] > %(message)s",
+      "datefmt": "%m/%d/%Y %H:%M:%S"
+    },
+    "brief": {
+      "format": "[%(asctime)s] [%(levelname)s] %(module)s:%(lineno)d > %(message)s",
+      "datefmt": "%H:%M:%S"
+    }
+  },
+  "filters": {
+    "special": {
+    }
+  },
+  "handlers": {
+    "null": {
+      "level": "DEBUG",
+      "class": "logging.NullHandler"
+    },
+    "console": {
+      "level": "INFO",
+      "class": "logging.StreamHandler",
+      "formatter": "brief"
+    },
+    "file": {
+      "level": "DEBUG",
+      "class": "logging.handlers.TimedRotatingFileHandler",
+      "formatter": "default",
+      "filename": "./.mute/log/mute.log",
+      "encoding": "utf-8",
+      "when": "d",
+      "interval": 1,
+      "backupCount": 7
+    }
+  },
+  "loggers": {
+    "mute": {
+      "handlers": ["console", "file"],
+      "level": "DEBUG",
+      "propagate": false
+    }
+  },
+  "root": {
+    "handlers": ["file"],
+    "level": "DEBUG"
+  }
+}
