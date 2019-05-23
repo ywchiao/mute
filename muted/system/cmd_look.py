@@ -8,7 +8,7 @@ from component.room import Room
 
 from event.event import Event
 from message.message import Message
-from message.out_stream import OutStream
+from system.channel import Channel
 
 from logcat.logcat import LogCat
 
@@ -23,43 +23,23 @@ class CmdLook:
         self, e: Event, entity: str = '', args: str = ''
     ) -> None:
         role = Role.instance(entity)
-        outs = OutStream.instance(entity)
 
         if not args:
             room = Room.instance(role.room)
 
-            outs.append(
-                Message(
-                    Message.TEXT,
-                    who='MUTE',
-                    text=f'{room.name} -'
-                )
-            )
+            text = f'{room.name} -'
+            Channel.toRole(entity, Message.TEXT, text)
 
             for text in room.description:
-                outs.append(
-                    Message(
-                        Message.TEXT,
-                        who='MUTE',
-                        text=text
-                    )
-                )
+                Channel.toRole(entity, Message.TEXT, text)
 
             if not room.exits:
-                outs.append(
-                    Message(
-                        Message.TEXT,
-                        who='MUTE',
-                        text='這裡沒有出口'
-                    )
-                )
+                text = '這裡沒有出口'
             else:
-                outs.append(
-                    Message(
-                        Message.TEXT,
-                        who='MUTE',
-                        text=room.exits
-                    )
-                )
+                text = room.exits
+        else:
+            text = f'你在看什麼？'
+
+        Channel.toRole(entity, Message.TEXT, text)
 
 # cmd_look.py

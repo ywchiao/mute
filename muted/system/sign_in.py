@@ -9,7 +9,7 @@ from component.room import Room
 
 from event.event import Event
 from message.message import Message
-from message.out_stream import OutStream
+from system.channel import Channel
 
 from logcat.logcat import LogCat
 
@@ -23,18 +23,10 @@ class SignIn:
 
     @LogCat.log_func
     def _on_reception(self, e: Event, entity: str) -> None:
-        outs = OutStream.instance(entity)
+        text=f'歡迎來到 MUTE: Multi-User Texting Environment'
+        Channel.toRole(entity, Message.TEXT, text)
 
-        outs.append(
-            Message(
-                Message.TEXT, who='MUTED',
-                text=f'歡迎來到 MUTE: Multi-User Texting Environment'
-            )
-        )
-
-        outs.append(
-            Message(Message.SIGN_IN, who='MUTED')
-        )
+        Channel.askRole(entity, Message.SIGN_IN)
 
     @LogCat.log_func
     def _on_sign_in(
@@ -45,13 +37,8 @@ class SignIn:
         Name.instance(entity, name=role.name)
         Room.instance(role.room).enter(entity)
 
-        OutStream.instance(entity).append(
-            Message(
-                Message.SYSTEM,
-                who='MUTE',
-                text=f'歡迎來到 MUTE: Multi-User Texting Environment'
-            )
-        )
+        text = f'歡迎來到 MUTE: Multi-User Texting Environment'
+        Channel.toRole(entity, Message.SYSTEM, text)
 
         Event.trigger(Event(Event.CMD_LOOK, self._servant, entity=entity))
 

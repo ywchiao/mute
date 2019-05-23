@@ -5,11 +5,10 @@ from typing import Type
 
 from component.name import Name
 from component.role import Role
-from component.room import Room
 
 from event.event import Event
 from message.message import Message
-from message.out_stream import OutStream
+from system.channel import Channel
 
 from logcat.logcat import LogCat
 
@@ -22,26 +21,14 @@ class CmdSay:
     def _on_cmd_say(
         self, e: Event, entity: str = '', args: str = ''
     ) -> None:
-        role = Role.instance(entity)
-
         if not args:
-            OutStream.instance(entity).append(
-                Message(
-                    Message.TEXT,
-                    who='MUTE',
-                    text=f'你想說什麼？'
-                )
-            )
+            text = f'你想說什麼？'
+
+            Channel.toRole(entity, Message.TEXT, text)
         else:
             text = f'{Name.instance(entity).text}說：{" ".join(args)}'
 
-            for entity in Room.instance(role.room).guests:
-                OutStream.instance(entity).append(
-                    Message(
-                        Message.TEXT,
-                        who='MUTE',
-                        text=text
-                    )
-                )
+            role = Role.instance(entity)
+            Channel.toRoom(role.room, Message.TEXT, text)
 
 # cmd_say.py
