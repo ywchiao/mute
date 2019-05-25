@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 from const.color import Color
-from element.element import Element
 from event.event import Event
+from widget.widget import Widget
 
 from logcat.logcat import LogCat
 
-class ScrollBar(Element):
+class ScrollBar(Widget):
     ARROW_UP = '▲'
     ARROW_DOWN = '▼'
     ARROW_LEFT = '◄'

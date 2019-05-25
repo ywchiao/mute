@@ -2,13 +2,13 @@
 from __future__ import annotations
 
 from const.color import Color
-from element.element import Element
 from event.event import Event
 from widget.scroll_bar import ScrollBar
+from widget.widget import Widget
 
 from logcat.logcat import LogCat
 
-class TextBox(Element):
+class TextBox(Widget):
     @LogCat.log_func
     def __init__(self, x=0, y=0, width=1, height=1):
         super().__init__(x, y, width, height)

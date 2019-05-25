@@ -5,6 +5,8 @@ from event.event import Event
 from event.handler import Handler
 from message.message import Message
 
+from system.channel import Channel
+from system.cmd_echo import CmdEcho
 from system.cmd_look import CmdLook
 from system.cmd_say import CmdSay
 from system.sign_in import SignIn
@@ -25,6 +27,7 @@ class Servant(Handler):
         if not cls._instance:
             cls._instance = Servant()
 
+            CmdEcho(cls._instance)
             CmdLook(cls._instance)
             CmdSay(cls._instance)
             SignIn(cls._instance)
@@ -35,8 +38,18 @@ class Servant(Handler):
     def _on_text(self, e: Event, entity: str, who: str, text: str) -> None:
         words = text.split()
 
-        Event.trigger(
-            Event(words[0], self, entity=entity, args=words[1:])
-        )
+        if len(words):
+            Event.trigger(
+                Event(words[0], self, entity=entity, args=words[1:])
+            )
+        else:
+            text = f'你要作什麼？'
+            Channel.toRole(entity, Message.TEXT, text)
+
+    @LogCat.log_func
+    def _on_any(self, e: Event, entity: str, **kwargs) -> None:
+        text = f'你要作什麼？'
+
+        Channel.toRole(entity, Message.TEXT, text)
 
 # servant.py

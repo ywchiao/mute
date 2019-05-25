@@ -1,6 +1,8 @@
 
 from __future__ import annotations
 
+from typing import List
+from typing import Optional
 from typing import Type
 
 import curses
@@ -45,8 +47,9 @@ class Event:
     CMD_ABBR_LOOK = 'l'
     RECEPTION = 'reception'
     CMD_SAY = 'say'
+    CMD_ECHO = 'echo'
 
-    _queue = []
+    _queue: List[Event] = []
 
     def __init__(
         self, type_: str, target: Type[Handler]=None, **kwargs: dict
@@ -56,12 +59,12 @@ class Event:
         self._kwargs = kwargs
 
     @classmethod
-    def empty(cls) -> None:
-        cls._queue = []
+    def next(cls) -> Optional[Event]:
+        return cls._queue.pop(0)
 
     @classmethod
-    def events(cls) -> list:
-        return cls._queue
+    def ready(cls) -> bool:
+        return bool(cls._queue)
 
     @classmethod
     def trigger(cls, e: Event) -> None:
@@ -76,7 +79,7 @@ class Event:
         return self._target
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self._type
 
     def __repr__(self):

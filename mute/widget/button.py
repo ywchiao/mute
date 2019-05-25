@@ -1,10 +1,10 @@
 
 from const.color import Color
-from element.element import Element
+from widget.widget import Widget
 
 from logcat.logcat import LogCat
 
-class Button(Element):
+class Button(Widget):
     @LogCat.log_func
     def __init__(self, x:int, y: int, text: str):
         super().__init__(x, y, 6)

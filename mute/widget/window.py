@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from const.color import Color
-from container.container import Container
 from event.event import Event
 from viewport.viewport import Viewport
+from widget.container import Container
 
 from logcat.logcat import LogCat
 
@@ -57,14 +57,14 @@ class Window(Container):
 
     @LogCat.log_func
     def _on_click(self, e: Event, x: int, y: int) -> bool:
-        for element in self.elements:
-            if element.contains(x - self.x, y - self.y):
+        for widget in self.components:
+            if widget.contains(x - self.x, y - self.y):
                 Event.trigger(
-                    Event(Event.CLICK, element, x=x, y=y)
+                    Event(Event.CLICK, widget, x=x, y=y)
                 )
 
-                if element.focusable:
-                    self._focus = element
+                if widget.focusable:
+                    self._focus = widget
 
                 break
 
@@ -84,8 +84,8 @@ class Window(Container):
                 .refresh()
         )
 
-        for element in self.elements:
-            element.paint(self._win)
+        for widget in self.components:
+            widget.paint(self._win)
 
         if self._focus:
             self._focus.paint(self._win)

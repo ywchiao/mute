@@ -20,10 +20,10 @@ class Handler:
         if e.type in self._handlers:
             self._handlers[e.type](e, **e.kwargs)
         else:
-            self._on_any(e)
+            self._on_any(e, **e.kwargs)
 
     @LogCat.log_func
-    def _on_any(self, e: Event) -> None:
+    def _on_any(self, e: Event, **kwargs) -> None:
         pass
 
 # handler.py

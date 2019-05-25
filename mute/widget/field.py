@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 from const.color import Color
-from element.element import Element
 from event.event import Event
+from widget.widget import Widget
 
 from logcat.logcat import LogCat
 
-class Field(Element):
+class Field(Widget):
     @LogCat.log_func
     def __init__(self, x=0, y=0, width=80):
         super().__init__(x, y, width)

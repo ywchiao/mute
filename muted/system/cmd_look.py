@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+from typing import List
 from typing import Type
 
 from component.role import Role
@@ -20,7 +21,7 @@ class CmdLook:
 
     @LogCat.log_func
     def _on_cmd_look(
-        self, e: Event, entity: str = '', args: str = ''
+        self, e: Event, entity: str = '', args: List[str] = []
     ) -> None:
         role = Role.instance(entity)
 

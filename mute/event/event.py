@@ -1,6 +1,10 @@
 
 from __future__ import annotations
 
+from typing import List
+from typing import Optional
+from typing import Type
+
 import curses
 import json
 
@@ -35,23 +39,31 @@ class Event:
     KEY_LEFT = curses.KEY_LEFT
     KEY_RIGHT = curses.KEY_RIGHT
     KEY_UP = curses.KEY_UP
-    NET_READ = 'net_read'
-    NET_WRITE = 'net_write'
+    SOCKET_READ = 'socket_read'
+    SOCKET_WRITE = 'socket_write'
+    NEW_CONN = 'new_conn'
+    MESSAGE = 'message'
+    CMD_LOOK = 'look'
+    CMD_ABBR_LOOK = 'l'
+    RECEPTION = 'reception'
+    CMD_SAY = 'say'
 
-    _queue = []
+    _queue: List[Event] = []
 
-    def __init__(self, type_: str, target=None, **kwargs):
+    def __init__(
+        self, type_: str, target: Type[Handler]=None, **kwargs: dict
+    ):
         self._type = type_
         self._target = target
         self._kwargs = kwargs
 
     @classmethod
-    def empty(cls) -> None:
-        cls._queue = []
+    def next(cls) -> Optional[Event]:
+        return cls._queue.pop(0)
 
     @classmethod
-    def events(cls) -> list:
-        return cls._queue
+    def ready(cls) -> bool:
+        return bool(cls._queue)
 
     @classmethod
     def trigger(cls, e: Event) -> None:
@@ -66,13 +78,15 @@ class Event:
         return self._target
 
     @property
-    def type(self):
+    def type(self) -> str:
         return self._type
 
     def __repr__(self):
+        kwargs_repr = [f'{k}={v!r}' for k, v in self._kwargs.items()]
+
         return json.dumps({
             'type': self._type,
-            'kwargs': self._kwargs
+            'kwargs': kwargs_repr
         })
 
 # event.py

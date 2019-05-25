@@ -13,23 +13,17 @@ from system.channel import Channel
 
 from logcat.logcat import LogCat
 
-class CmdSay:
+class CmdEcho:
     @LogCat.log_func
     def __init__(self, servant: Type[Handler]):
-        servant.on(Event.CMD_SAY, self._on_cmd_say)
+        servant.on(Event.CMD_ECHO, self._on_cmd_echo)
 
     @LogCat.log_func
-    def _on_cmd_say(
+    def _on_cmd_echo(
         self, e: Event, entity: str = '', args: List[str] = []
     ) -> None:
-        if not args:
-            text = f'你想說什麼？'
+        text = f'ECHO 說：{" ".join(args)}'
 
-            Channel.toRole(entity, Message.TEXT, text)
-        else:
-            text = f'{Name.instance(entity).text} 說：{" ".join(args)}'
+        Channel.toRole(entity, Message.TEXT, text)
 
-            role = Role.instance(entity)
-            Channel.toRoom(role.room, Message.TEXT, text)
-
-# cmd_say.py
+# cmd_echo.py

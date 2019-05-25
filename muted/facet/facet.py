@@ -16,7 +16,10 @@ class Facet:
 
             if path.is_file():
                 with path.open(encoding='utf-8') as fin:
-                    cls._cache[entity] = cls(**json.load(fin))
+                    for key, value in json.load(fin).items():
+                        cls._cache[key] = cls(value)
+
+                entity = ""
             else:
                 cls._cache[entity] = cls(**kwargs)
 

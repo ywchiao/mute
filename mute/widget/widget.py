@@ -8,7 +8,7 @@ from event.handler import Handler
 
 from logcat.logcat import LogCat
 
-class Element(Handler):
+class Widget(Handler):
     @LogCat.log_func
     def __init__(self, x=0, y=0, width=1, height=1):
         super().__init__()
@@ -71,4 +71,4 @@ class Element(Handler):
     def y(self):
         return self._y
 
-# element.py
+# widget.py

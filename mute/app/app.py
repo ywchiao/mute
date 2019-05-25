@@ -9,6 +9,7 @@ from event.event import Event
 from event.handler import Handler
 from message.out_stream import OutStream
 from window_manager.window_manager import WindowManager
+from system.core import Core
 
 from logcat.logcat import LogCat
 
@@ -21,6 +22,8 @@ class App(Handler):
         self._window_manager = WindowManager()
 
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self._dirty = True
 
         self.on(Event.CURSOR_ON, lambda _: curses.curs_set(True))
         self.on(Event.CURSOR_OFF, lambda _: curses.curs_set(False))
@@ -38,6 +41,8 @@ class App(Handler):
         self._window.refresh()
 
         self._window_manager.on_event(Event(Event.PAINT))
+
+        self._dirty = False
 
     @LogCat.log_func
     def start(self) -> None:
@@ -89,24 +94,23 @@ class App(Handler):
 
     @LogCat.log_func
     def _loop(self) -> None:
-        self.paint()
-
         while True:
+            if self._dirty:
+                self.paint()
+
             self._check_input()
 
-            if Event.events():
-                events = Event.events().copy()
-                Event.empty()
+            while Event.ready():
+                e = Event.next()
 
-                for e in events:
-                    if e.type == Event.EXIT:
-                        exit()
-                    elif e.target:
-                        e.target.on_event(e)
-                    else:
-                        self.on_event(e)
+                if e.type == Event.EXIT:
+                    exit()
+                elif e.target:
+                    e.target.on_event(e)
+                else:
+                    self.on_event(e)
 
-                self.paint()
+                self._dirty = True
 
             OutStream.instance('').write(self._socket)
 
