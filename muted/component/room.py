@@ -21,7 +21,6 @@ class Room(Facet):
         name: str = '',
         brief: str = '',
         desc: str = '',
-        exits: dict = {},
         npcs: list = []
     ):
         self._name = name
@@ -29,7 +28,6 @@ class Room(Facet):
         self._desc = desc
         self._guests = []
         self._npcs = npcs
-        self._exits = exits
 
     @LogCat.log_func
     def enter(self, entity: str) -> None:
@@ -42,21 +40,9 @@ class Room(Facet):
         except:
             pass
 
-    @LogCat.log_func
-    def multicast(self, msg):
-        for guest in self._guests:
-            guest.send(msg)
-
     @property
     def description(self) -> str:
         return Description.instance(self._desc).text
-
-    @property
-    def exits(self) -> str:
-        if self._exits:
-            return f'這裡明顯的出口有： {",".join(self._exits.keys())}'
-        else:
-            return f'這裡沒有出口。'
 
     @property
     def guests(self) -> List[str]:

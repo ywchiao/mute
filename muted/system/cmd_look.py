@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import List
 from typing import Type
 
+from component.exit import Exit
 from component.role import Role
 from component.room import Room
 
@@ -34,10 +35,12 @@ class CmdLook:
             for text in room.description:
                 Channel.toRole(entity, Message.TEXT, text)
 
-            if not room.exits:
+            exits = Exit.instance(role.room)
+
+            if not exits:
                 text = '這裡沒有出口'
             else:
-                text = room.exits
+                text = f'  這裡明顯的出口有：{exits.keys()}'
         else:
             text = f'你在看什麼？'
 

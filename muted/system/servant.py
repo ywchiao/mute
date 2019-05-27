@@ -8,6 +8,7 @@ from message.message import Message
 from system.channel import Channel
 from system.cmd_echo import CmdEcho
 from system.cmd_look import CmdLook
+from system.cmd_move import CmdMove
 from system.cmd_say import CmdSay
 from system.sign_in import SignIn
 
@@ -29,6 +30,7 @@ class Servant(Handler):
 
             CmdEcho(cls._instance)
             CmdLook(cls._instance)
+            CmdMove(cls._instance)
             CmdSay(cls._instance)
             SignIn(cls._instance)
 

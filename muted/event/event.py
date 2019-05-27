@@ -48,6 +48,10 @@ class Event:
     RECEPTION = 'reception'
     CMD_SAY = 'say'
     CMD_ECHO = 'echo'
+    CMD_EAST = 'e'
+    CMD_NORTH = 'n'
+    CMD_SOUTH = 's'
+    CMD_WEST = 'w'
 
     _queue: List[Event] = []
 

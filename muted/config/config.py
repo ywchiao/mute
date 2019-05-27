@@ -37,6 +37,7 @@ class Config:
                        'data': {
                            'brief': 'brief',
                            'desc': 'desc',
+                           'exit': 'exit',
                            'name': 'name',
                            'role': 'role',
                            'room': 'room'
@@ -83,11 +84,25 @@ class Config:
         )
 
     @property
+    def EXIT(self) -> str:
+        return (
+            f'{self._kwargs["root"]["data"]}/'
+            f'{self._kwargs["data"]["exit"]}'
+        )
+
+    @property
     def NAME(self) -> str:
         return (
             f'{self._kwargs["root"]["data"]}/'
             f'{self._kwargs["data"]["name"]}'
         )
+    @property
+    def NAME(self) -> str:
+        return (
+            f'{self._kwargs["root"]["data"]}/'
+            f'{self._kwargs["data"]["name"]}'
+        )
+
     @property
     def ROLE(self) -> str:
         return (
