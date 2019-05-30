@@ -28,7 +28,7 @@ class Exit(Facet):
     def to(self, d: str) -> Optional[str]:
         try:
             room = self._links[d]
-        except:
+        except KeyError:
             room = None
 
         return room

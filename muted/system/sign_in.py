@@ -24,9 +24,9 @@ class SignIn:
     @LogCat.log_func
     def _on_reception(self, e: Event, entity: str) -> None:
         text=f'歡迎來到 MUTE: Multi-User Texting Environment'
-        Channel.toRole(entity, Message.TEXT, text)
+        Channel.to_role(entity, Message.TEXT, text)
 
-        Channel.askRole(entity, Message.SIGN_IN)
+        Channel.ask_role(entity, Message.SIGN_IN)
 
     @LogCat.log_func
     def _on_sign_in(
@@ -38,7 +38,7 @@ class SignIn:
         Room.instance(role.room).enter(entity)
 
         text = f'歡迎來到 MUTE: Multi-User Texting Environment'
-        Channel.toRole(entity, Message.SYSTEM, text)
+        Channel.to_role(entity, Message.SYSTEM, text)
 
         Event.trigger(Event(Event.CMD_LOOK, self._servant, entity=entity))
 

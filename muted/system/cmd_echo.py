@@ -24,6 +24,6 @@ class CmdEcho:
     ) -> None:
         text = f'ECHO 說：{" ".join(args)}'
 
-        Channel.toRole(entity, Message.TEXT, text)
+        Channel.to_role(entity, Message.TEXT, text)
 
 # cmd_echo.py

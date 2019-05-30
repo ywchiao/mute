@@ -1,8 +1,14 @@
 
 from __future__ import annotations
 
+from typing import List
+
 from config.config import CONFIG
 from facet.facet import Facet
+
+from component.brief import Brief
+from component.description import Description
+#from component.name import Name
 
 from logcat.logcat import LogCat
 
@@ -13,15 +19,36 @@ class NPC(Facet):
     @LogCat.log_func
     def __init__(
         self,
-        brief: str = '一位一臉茫然，不知道自己為何在這兒出現的人。',
-        description: list = [
-            '他站在那兒，一臉的茫然。他不認識這兒，他壓根兒不知他',
-            '什麼會在這兒出現。他低頭看看身上的衣服，他沒見有人這',
-            '樣穿過，至少在他記憶裡沒有。',
-            '我是誰？我為什麼在這裡？我要作什麼？他苦惱的想著。'
-        ],
-        name: str = '臨時演員',
+        brief: str = 'cd569caf9e024c63b961f4c2b4cc2e59',
+        desc: str = 'b376927454d94fe4bf12cb2800188417',
+        level: int = 1,
+#        name: str = '臨演',
+        tag: str = 'lin-yan'
     ):
-        pass
+        self._brief = brief
+        self._desc = desc
+        self._level = level
+#        self._name = name
+        self._tag = tag
+
+    @property
+    def brief(self) -> List[str]:
+        return Brief.instance(self._brief).text
+
+    @property
+    def description(self) -> List[str]:
+        return Description.instance(self._desc).text
+
+    @property
+    def level(self) -> str:
+        return self._level
+
+#    @property
+#    def name(self) -> str:
+#        return Name.instance(self._name).text
+
+    @property
+    def tag(self) -> str:
+        return self._tag
 
 # npc.py

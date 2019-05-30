@@ -25,11 +25,11 @@ class CmdSay:
         if not args:
             text = f'你想說什麼？'
 
-            Channel.toRole(entity, Message.TEXT, text)
+            Channel.to_role(entity, Message.TEXT, text)
         else:
             text = f'{Name.instance(entity).text} 說：{" ".join(args)}'
 
             role = Role.instance(entity)
-            Channel.toRoom(role.room, Message.TEXT, text)
+            Channel.to_room(role.room, Message.TEXT, text)
 
 # cmd_say.py

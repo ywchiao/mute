@@ -13,6 +13,8 @@
     "desc": "desc",
     "exit": "exit",
     "name": "name",
+    "passer": "passer",
+    "npc": "npc",
     "role": "role",
     "room": "room"
   },

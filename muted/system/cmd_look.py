@@ -4,7 +4,11 @@ from __future__ import annotations
 from typing import List
 from typing import Type
 
+from component.description import Description
 from component.exit import Exit
+from component.name import Name
+from component.npc import NPC
+from component.passer import Passer
 from component.role import Role
 from component.room import Room
 
@@ -27,23 +31,55 @@ class CmdLook:
         role = Role.instance(entity)
 
         if not args:
-            room = Room.instance(role.room)
-
-            text = f'{room.name} -'
-            Channel.toRole(entity, Message.TEXT, text)
-
-            for text in room.description:
-                Channel.toRole(entity, Message.TEXT, text)
-
-            exits = Exit.instance(role.room)
-
-            if not exits:
-                text = '這裡沒有出口'
-            else:
-                text = f'  這裡明顯的出口有：{exits.keys()}'
+            text = [
+                *self._room_desc(role.room),
+                self._room_passer(role.room),
+                self._room_exit(role.room)
+            ]
         else:
-            text = f'你在看什麼？'
+            text = self._look_at(role.room, args[0])
 
-        Channel.toRole(entity, Message.TEXT, text)
+        for line in text:
+            Channel.to_role(entity, Message.TEXT, line)
+
+    @LogCat.log_func
+    def _look_at(self, room: str, tag: str) -> List[str]:
+        target = Passer.instance(room).with_tag(tag)
+
+        if target:
+            text = [
+                f'你上下打量著[{Name.instance(target).text}]，你看見一位：',
+                *NPC.instance(target).description
+            ]
+        else:
+            text = [f'  你在看什麼？']
+
+        return text
+
+    @LogCat.log_func
+    def _room_desc(self, room: str) -> List[str]:
+        room = Room.instance(room)
+
+        return [
+          f'{room.name} -',
+          *room.description
+        ]
+
+    @LogCat.log_func
+    def _room_exit(self, room: str) -> str:
+        exits = Exit.instance(room)
+
+        if not exits:
+            text = f'  這裡沒有出口'
+        else:
+            text = f'  這裡明顯的出口有：{exits.keys()}'
+
+        return text
+
+    @LogCat.log_func
+    def _room_passer(self, room: str) -> str:
+        text = Passer.instance(room).list
+
+        return f'  這裡旳人有：{text}'
 
 # cmd_look.py

@@ -96,11 +96,19 @@ class Config:
             f'{self._kwargs["root"]["data"]}/'
             f'{self._kwargs["data"]["name"]}'
         )
+
     @property
-    def NAME(self) -> str:
+    def NPC(self) -> str:
         return (
             f'{self._kwargs["root"]["data"]}/'
-            f'{self._kwargs["data"]["name"]}'
+            f'{self._kwargs["data"]["npc"]}'
+        )
+
+    @property
+    def PASSER(self) -> str:
+        return (
+            f'{self._kwargs["root"]["data"]}/'
+            f'{self._kwargs["data"]["passer"]}'
         )
 
     @property

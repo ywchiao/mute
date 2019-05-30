@@ -41,6 +41,6 @@ class CmdMove:
 
             Event.trigger(Event(Event.CMD_LOOK, self._servant, entity=entity))
         else:
-            Channel.toRole(entity, Message.SYSTEM, f'這裡沒有出口')
+            Channel.to_role(entity, Message.TEXT, f'  這裡沒有出口')
 
 # cmd_move.py

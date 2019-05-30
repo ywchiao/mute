@@ -6,6 +6,7 @@ import socket
 from event.event import Event
 from event.handler import Handler
 from system.net_io import NetIO
+from system.timed import Timed
 
 from logcat.logcat import LogCat
 
@@ -39,6 +40,8 @@ class Muted(Handler):
                     e.target.on_event(e)
                 else:
                     self.on_event(e)
+
+            Timed.update()
 
 if __name__ == '__main__':
     muted = Muted()

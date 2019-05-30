@@ -52,6 +52,8 @@ class Event:
     CMD_NORTH = 'n'
     CMD_SOUTH = 's'
     CMD_WEST = 'w'
+    CMD_KILL = 'kill'
+    CMD_ABBR_KILL = 'k'
 
     _queue: List[Event] = []
 
