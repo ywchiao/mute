@@ -6,6 +6,7 @@ from typing import List
 from config.config import CONFIG
 from facet.facet import Facet
 
+from component.genus import Genus
 from component.name import Name
 from component.npc import NPC
 
@@ -46,7 +47,8 @@ class Passer(Facet):
     @property
     def list(self) -> List[str]:
         return ', '.join([
-            f'{Name.instance(npc).text} ({NPC.instance(npc).tag})'
+            f'{Name.instance(Genus.instance(npc)).text} '
+            f'({NPC.instance(Genus.instance(npc)).tag})'
             for npc in self._passer
         ])
 

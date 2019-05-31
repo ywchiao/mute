@@ -1,0 +1,10 @@
+{
+  "player.entity": "name",
+  "room.entity": "name",
+  "genus.entity": "name",
+  "skill.entity": "name",
+  "crafting.entity": "name",
+  "weapon.entity": "name",
+  "eq.entity": "name"
+  "faction.entity": "name"
+}

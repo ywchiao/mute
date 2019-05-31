@@ -14,6 +14,6 @@ class Timed:
         t = time.time_ns()
 
         Attack.instance().update(t)
-#        Regen.instance().update(t)
+        Regen.instance().update(t)
 
 # timed.py

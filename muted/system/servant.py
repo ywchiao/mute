@@ -11,6 +11,7 @@ from system.cmd_echo import CmdEcho
 from system.cmd_look import CmdLook
 from system.cmd_move import CmdMove
 from system.cmd_say import CmdSay
+from system.cmd_score import CmdScore
 from system.sign_in import SignIn
 
 from logcat.logcat import LogCat
@@ -34,6 +35,7 @@ class Servant(Handler):
             CmdLook(cls._instance)
             CmdMove(cls._instance)
             CmdSay(cls._instance)
+            CmdScore(cls._instance)
             SignIn(cls._instance)
 
         return cls._instance

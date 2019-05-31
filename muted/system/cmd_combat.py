@@ -4,13 +4,14 @@ from __future__ import annotations
 from typing import List
 from typing import Type
 
+from component.genus import Genus
 from component.name import Name
 from component.passer import Passer
 from component.role import Role
 from event.event import Event
 from message.message import Message
-from system.channel import Channel
 from system.attack import Attack
+from system.channel import Channel
 
 from logcat.logcat import LogCat
 
@@ -32,16 +33,15 @@ class CmdCombat:
             text = f'  你想要殺誰？'
         else:
             target = Passer.instance(role.room).with_tag(args[0])
-            name = Name.instance(target).text
 
             if not target:
                 text = f'  這裡沒有這個人。'
             else:
+                name = Name.instance(Genus.instance(target)).text
                 text = f'  你大喝一聲：「{name}納命來。」就朝{name}發起攻擊。'
 
                 Attack.instance().enlist(entity, target)
 
         Channel.to_role(entity, Message.TEXT, text)
-
 
 # cmd_combat.py

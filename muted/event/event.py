@@ -54,6 +54,8 @@ class Event:
     CMD_WEST = 'w'
     CMD_KILL = 'kill'
     CMD_ABBR_KILL = 'k'
+    CMD_SCORE = 'score'
+    CMD_ABBR_SCORE = 'sc'
 
     _queue: List[Event] = []
 

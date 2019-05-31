@@ -46,11 +46,11 @@ class HitPoint(Facet):
         return self._hp
 
     @property
-    def full_point(self) -> int:
+    def max_value(self) -> int:
         return self._max
 
     @property
-    def hp(self) -> int:
+    def value(self) -> int:
         return self._hp
 
 # hit_point.py

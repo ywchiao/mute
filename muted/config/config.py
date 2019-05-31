@@ -38,6 +38,7 @@ class Config:
                            'brief': 'brief',
                            'desc': 'desc',
                            'exit': 'exit',
+                           'genus': 'genus',
                            'name': 'name',
                            'role': 'role',
                            'room': 'room'
@@ -88,6 +89,20 @@ class Config:
         return (
             f'{self._kwargs["root"]["data"]}/'
             f'{self._kwargs["data"]["exit"]}'
+        )
+
+    @property
+    def GENUS(self) -> str:
+        return (
+            f'{self._kwargs["root"]["data"]}/'
+            f'{self._kwargs["data"]["genus"]}'
+        )
+
+    @property
+    def LEVEL(self) -> str:
+        return (
+            f'{self._kwargs["root"]["data"]}/'
+            f'{self._kwargs["data"]["level"]}'
         )
 
     @property

@@ -12,6 +12,8 @@
     "brief": "brief",
     "desc": "desc",
     "exit": "exit",
+    "genus": "genus",
+    "level": "level",
     "name": "name",
     "passer": "passer",
     "npc": "npc",

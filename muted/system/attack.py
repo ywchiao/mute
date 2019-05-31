@@ -7,12 +7,14 @@ from typing import Tuple
 import random
 import time
 
+from component.atk_power import AtkPower
+from component.genus import Genus
 from component.hit_point import HitPoint
 from component.name import Name
-from component.strength import Strength
 
 from message.message import Message
 from system.channel import Channel
+from system.regen import Regen
 
 from logcat.logcat import LogCat
 
@@ -44,7 +46,7 @@ class Attack:
             if t_ns - t > 1500000000:
                 self._attack(a, d)
 
-                if HitPoint.instance(a).hp and HitPoint.instance(d).hp:
+                if HitPoint.instance(a).value and HitPoint.instance(d).value:
                     queue.append((a, d, t + 1500000000))
             else:
                 queue.append((a, d, t))
@@ -52,39 +54,38 @@ class Attack:
         self._queue = queue
 
     def _attack(self, attacker: str, defender: str) -> bool:
-        power = Strength.instance(attacker).value
-
-        damage = random.randint(1, power)
+        damage = random.randint(1, AtkPower.instance(attacker).value)
         HitPoint.instance(defender).lose(damage)
-
 
         Channel.to_role(
             attacker,
             Message.TEXT,
-            f'  你對[{Name.instance(defender).text}]'
+            f'  你對[{Name.instance(Genus.instance(defender)).text}]'
             f'的普通攻擊造成了{damage}點傷害。'
         )
 
         Channel.to_role(
             defender,
             Message.TEXT,
-            f'  [{Name.instance(attacker).text}]'
+            f'  [{Name.instance(Genus.instance(attacker)).text}]'
             f'對你的普通攻擊造成了{damage}點傷害。'
         )
 
-        if not HitPoint.instance(defender).hp:
+        if not HitPoint.instance(defender).value:
             Channel.to_role(
                 attacker,
                 Message.TEXT,
-                f'  [{Name.instance(defender).text}] 被'
-                f'[{Name.instance(attacker).text}] 殺死了。'
+                f'  [{Name.instance(Genus.instance(defender)).text}]被'
+                f'[{Name.instance(Genus.instance(attacker)).text}]殺死了。'
             )
 
             Channel.to_role(
                 defender,
                 Message.TEXT,
-                f'  [{Name.instance(defender).text}] 被'
-                f'[{Name.instance(attacker).text}] 殺死了。'
+                f'  [{Name.instance(Genus.instance(defender)).text}] 被'
+                f'[{Name.instance(Genus.instance(attacker)).text}] 殺死了。'
             )
+
+            Regen.instance().enlist(HitPoint.instance(attacker))
 
 # attack.py
