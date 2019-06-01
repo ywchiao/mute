@@ -9,6 +9,7 @@
     "log": "./.muted/log"
   },
   "data": {
+    "bag": "bag",
     "brief": "brief",
     "desc": "desc",
     "exit": "exit",

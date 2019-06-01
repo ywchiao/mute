@@ -11,6 +11,7 @@ from component.atk_power import AtkPower
 from component.genus import Genus
 from component.hit_point import HitPoint
 from component.name import Name
+from event.event import Event
 
 from message.message import Message
 from system.channel import Channel
@@ -85,6 +86,13 @@ class Attack:
                 f'  [{Name.instance(Genus.instance(defender)).text}] 被'
                 f'[{Name.instance(Genus.instance(attacker)).text}] 殺死了。'
             )
+
+#            Event.trigger(
+#                Event(
+#                    Event.DEATH, Servant.instance(),
+                    #entity=defender
+#                )
+#            )
 
             Regen.instance().enlist(HitPoint.instance(attacker))
 

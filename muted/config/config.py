@@ -71,6 +71,13 @@ class Config:
         )
 
     @property
+    def BAG(self) -> str:
+        return (
+            f'{self._kwargs["root"]["data"]}/'
+            f'{self._kwargs["data"]["bag"]}'
+        )
+
+    @property
     def BRIEF(self) -> str:
         return (
             f'{self._kwargs["root"]["data"]}/'

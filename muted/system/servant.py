@@ -8,10 +8,12 @@ from message.message import Message
 from system.channel import Channel
 from system.cmd_combat import CmdCombat
 from system.cmd_echo import CmdEcho
+from system.cmd_inventory import CmdInventory
 from system.cmd_look import CmdLook
 from system.cmd_move import CmdMove
 from system.cmd_say import CmdSay
 from system.cmd_score import CmdScore
+from system.death import Death
 from system.sign_in import SignIn
 
 from logcat.logcat import LogCat
@@ -32,10 +34,12 @@ class Servant(Handler):
 
             CmdCombat(cls._instance)
             CmdEcho(cls._instance)
+            CmdInventory(cls._instance)
             CmdLook(cls._instance)
             CmdMove(cls._instance)
             CmdSay(cls._instance)
             CmdScore(cls._instance)
+            Death(cls._instance)
             SignIn(cls._instance)
 
         return cls._instance

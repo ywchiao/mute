@@ -20,9 +20,13 @@ class CmdMove:
         self._servant = servant
 
         servant.on(Event.CMD_EAST, self._on_cmd_move)
+        servant.on(Event.CMD_ABBR_EAST, self._on_cmd_move)
         servant.on(Event.CMD_NORTH, self._on_cmd_move)
+        servant.on(Event.CMD_ABBR_NORTH, self._on_cmd_move)
         servant.on(Event.CMD_SOUTH, self._on_cmd_move)
+        servant.on(Event.CMD_ABBR_SOUTH, self._on_cmd_move)
         servant.on(Event.CMD_WEST, self._on_cmd_move)
+        servant.on(Event.CMD_ABBR_WEST, self._on_cmd_move)
 
     @LogCat.log_func
     def _on_cmd_move(
@@ -31,7 +35,7 @@ class CmdMove:
         role = Role.instance(entity)
         exit = Exit.instance(role.room)
 
-        room = exit.to(e.type)
+        room = exit.to(e.type[0])
 
         if None != room:
             Room.instance(role.room).leave(entity)
