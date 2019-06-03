@@ -25,7 +25,10 @@ class Facet:
     @classmethod
     def _from_file(cls, entity: str, data: dict) -> str:
         for key, value in data.items():
-            cls._cache[key] = cls(**value)
+            if dict == type(value):
+                cls._cache[key] = cls(**value)
+            else:
+                cls._cache[key] = cls(value)
 
         return ""
 

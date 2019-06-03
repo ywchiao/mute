@@ -16,9 +16,9 @@ class Exit(Facet):
     @LogCat.log_func
     def __init__(
         self,
-        links: Mapping[str, str]
+        **kwargs: Mapping[str, str]
     ):
-        self._links = links
+        self._links = kwargs
 
     @LogCat.log_func
     def keys(self) -> str:
