@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import List
 from typing import Type
 
-from component.bag import Bag
+from component.baggage import Baggage
 
 from event.event import Event
 from message.message import Message
@@ -22,13 +22,23 @@ class CmdInventory:
     def _on_cmd_inventory(
         self, e: Event, entity: str = '', args: List[str] = []
     ) -> None:
-        if not Bag.instance(entity):
-            text = f'  你身上沒有東西。'
-        else:
-            text = f'  你身上有：'
+        items = [
+            item
+            for bag in Baggage.instance(entity).items
+            for item in Baggage.instance(bag).items
+        ]
 
-#        for text in inventory:
-#            Channel.to_role(entity, Message.TEXT, text)
-        Channel.to_role(entity, Message.TEXT, text)
+        if not items:
+            inventory = [ f'  你身上沒有東西。' ]
+        else:
+            inventory = [ f'你身上帶著有：' ]
+
+            for item in items:
+                inventory.append(
+                    f'  {Name.instance(item).text}'
+                )
+
+        for text in inventory:
+            Channel.to_role(entity, Message.TEXT, text)
 
 # cmd_inventory.py

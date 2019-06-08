@@ -1,0 +1,17 @@
+[
+  {
+    "name": "短刀",
+    "tag": "knife",
+    "attack_power": 5,
+    "defence_power": 1,
+    "description": [
+      "一柄毫不起眼的短刀。"
+    ],
+    "brief": "一柄短刀",
+    "buy": 23,
+    "sell": 1,
+    "durability": 100,
+    "item_type": "weapon",
+    "entity": "55b9d5966d7d4f1c916c0ff97c78c090"
+  }
+]

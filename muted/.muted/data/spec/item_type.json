@@ -1,0 +1,97 @@
+[
+  {
+    "name": "武器",
+    "tag": "weapon",
+    "entity": "f5353ada30584f728f6aaeea1f039509"
+  },
+  {
+    "name": "裝備",
+    "tag": "equipment",
+    "entity": "53718d5b2f0c4c9699f637522adfd1fe"
+  },
+  {
+    "name": "投擲武器",
+    "tag": "throwing",
+    "entity": "36990572caaa4b9190fccee47ab194fa"
+  },
+  {
+    "name": "刀",
+    "tag": "blade",
+    "entity": "30d5cb02ff5e4f7dba6b0f4744017a32"
+  },
+  {
+    "name": "劍",
+    "tag": "sword",
+    "entity": "392c64abdce04983acc5e435e2a5ad47"
+  },
+  {
+    "name": "長柄",
+    "tag": "spear",
+    "entity": "6e192686a18a4463aded98ff4e59ca9c"
+  },
+  {
+    "name": "盾",
+    "tag": "shield",
+    "entity": "0562e898a61840f3835e35d729c94cf2"
+  },
+  {
+    "name": "雙手武",
+    "tag": "two_hands",
+    "entity": "7aeb34a482e64a9fbb29ed5e06527a86"
+  },
+  {
+    "name": "單手武",
+    "tag": "one_hand",
+    "entity": "93b2d0afd29740df92587245b8b03d74"
+  },
+  {
+    "name": "頭部",
+    "tag": "head",
+    "entity": "6307a5f468cc4a568c68152cd853be31"
+  },
+  {
+    "name": "頸部",
+    "tag": "neck",
+    "entity": "6a824b60fd6d40349046613a79374fa0"
+  },
+  {
+    "name": "肩膀",
+    "tag": "shoulders",
+    "entity": "c596507193064d32930b1d2a1f123985"
+  },
+  {
+    "name": "身體",
+    "tag": "body",
+    "entity": "5eb3d4e07e6d4c5b9471496a9ebfbda0"
+  },
+  {
+    "name": "背部",
+    "tag": "back",
+    "entity": "feaf6258986e47a2819ab100df1c499a"
+  },
+  {
+    "name": "腰部",
+    "tag": "waist",
+    "entity": "02119276bcde4705bfd38c7afc46d404"
+  },
+  {
+    "name": "手部",
+    "tag": "hands",
+    "entity": "1ca75bbf6e384579ac0f0674c7329cf3"
+  },
+  {
+    "name": "手指",
+    "tag": "fingers",
+    "entity": "1348e51ac01e436b9d15efb00ca99a20"
+  },
+  {
+    "name": "腿部",
+    "tag": "legs",
+    "entity": "b0e6a20c03934ddd8911f75f80148220"
+  },
+  {
+    "name": "腳部",
+    "tag": "feet",
+    "entity": "1b2612b3c95844008e543da7c4bda313"
+  }
+]

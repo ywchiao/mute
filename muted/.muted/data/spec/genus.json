@@ -1,0 +1,39 @@
+[
+  {
+    "name": "鹿",
+    "tag": "deer",
+    "attack_power": 1,
+    "defence_power": 3,
+    "description": [
+      "一頭鹿站在那兒，正警戒著看著你。"
+    ],
+    "brief": "一頭遊蕩的鹿",
+    "hitpoint": 100,
+    "entity": "2ce2e4c5db634fb0a88aac2d70ab9816"
+  },
+  {
+    "name": "兔子",
+    "tag": "rabbit",
+    "attack_power": 1,
+    "defence_power": 1,
+    "description": [
+      "一隻兔子伏在那兒，耳朵伏在背後，鼻子在空中不停地抽",
+      "動著。"
+    ],
+    "brief": "一隻兔子",
+    "hitpoint": 100,
+    "entity": "a40a229850d344799cbf75d59a91d5e2"
+  },
+  {
+    "name": "狼",
+    "tag": "wolf",
+    "attack_power": 5,
+    "defence_power": 3,
+    "description": [
+      "一匹飢腸轆轆的狼。"
+    ],
+    "brief": "一匹狼",
+    "hitpoint": 300,
+    "entity": "a93ddd64fecc44e8946195aed910739d"
+  }
+]

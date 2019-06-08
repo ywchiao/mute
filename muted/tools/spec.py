@@ -16,15 +16,22 @@ def to_spec():
     for f in path.iterdir():
         print(f'------{f}-------')
         if f.is_file():
+            spec = ''
+
             with f.open(encoding='utf-8') as fin:
                 spec = json.load(fin)
 
-                try:
-                    entity = spec['entity']
-                except KeyError:
-                    spec['entity'] = Entity.eid()
+                for item in spec:
+                    try:
+                        entity = item['entity']
+                    except KeyError:
+                        item['entity'] = Entity.eid()
 
-                print(json.dumps(spec, indent=2))
+                print(json.dumps(spec, ensure_ascii=False, indent=2))
+
+            with f.open(mode='w', encoding='utf-8') as fout:
+                json.dump(spec, fout, ensure_ascii=False, indent=2)
+#                fout.write(json.dumps(spec, indent=2))
 
 if __name__ == '__main__':
     to_spec()

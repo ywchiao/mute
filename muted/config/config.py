@@ -71,10 +71,10 @@ class Config:
         )
 
     @property
-    def BAG(self) -> str:
+    def BAGGAGE(self) -> str:
         return (
             f'{self._kwargs["root"]["data"]}/'
-            f'{self._kwargs["data"]["bag"]}'
+            f'{self._kwargs["data"]["baggage"]}'
         )
 
     @property
