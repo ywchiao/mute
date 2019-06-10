@@ -1,0 +1,32 @@
+{
+  "name": {
+    "entity": "4b26dca766414f1cb769e4298960760f",
+    "text": "狼"
+  },
+  "tag": {
+    "entity": "1a51f0d622c24a888d3cda2a8c13e822",
+    "text": "wolf"
+  },
+  "attack_power": {
+    "entity": "f21b5ddbb5b84eb1a4c6db0e89ccfa07",
+    "value": 5
+  },
+  "defence_power": {
+    "entity": "89591643c04847a784c9ed86cd037daa",
+    "value": 3
+  },
+  "description": {
+    "entity": "898174e89914497f885d47b2dbce789e",
+    "text": [
+      "一匹飢腸轆轆的狼。"
+    ]
+  },
+  "brief": {
+    "entity": "5ab247f392fd49e8ae9a2a47fd22a8ae",
+    "text": "一匹狼"
+  },
+  "hitpoint": {
+    "entity": "e90e7b819eaf4370a8d53829245905ed",
+    "value": 300
+  }
+}

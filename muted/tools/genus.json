@@ -1,0 +1,87 @@
+{
+  "deer": {
+    "name": {
+      "entity": "cd17bec429254fdcb8bac8b0300153ce",
+      "text": "鹿"
+    },
+    "attack_power": {
+      "entity": "d9ce11e95f094397a2f79bdfbe840aed",
+      "value": 1
+    },
+    "defence_power": {
+      "entity": "e770496a08b747a3a4d9c9d3e851d36b",
+      "value": 3
+    },
+    "description": {
+      "entity": "f7fe48c97c4b426888123ddc766a1be9",
+      "text": [
+        "一頭鹿站在那兒，正警戒著看著你。"
+      ]
+    },
+    "brief": {
+      "entity": "dd2eeb378e7249da8f4f5bc02c0e4202",
+      "text": "一頭遊蕩的鹿"
+    },
+    "hitpoint": {
+      "entity": "80ba7de63fd04884b06512d63b636575",
+      "value": 100
+    }
+  },
+  "rabbit": {
+    "name": {
+      "entity": "5384cb356e7e4faf894c0febc255cff0",
+      "text": "兔子"
+    },
+    "attack_power": {
+      "entity": "4a3bf06eda434f4aaee0627758a32c9a",
+      "value": 1
+    },
+    "defence_power": {
+      "entity": "149a91c43adf4f92849ea84a5ecc4d46",
+      "value": 1
+    },
+    "description": {
+      "entity": "895362c2784e4bda88421ec900b87198",
+      "text": [
+        "一隻兔子伏在那兒，耳朵伏在背後，鼻子在空中不停地抽",
+        "動著。"
+      ]
+    },
+    "brief": {
+      "entity": "0a34f7684e224ba38e8c75dd8e7ee628",
+      "text": "一隻兔子"
+    },
+    "hitpoint": {
+      "entity": "f5f0588527264e20b7bfbcb8dc61788a",
+      "value": 100
+    }
+  },
+  "wolf": {
+    "name": {
+      "entity": "3d5b55a879bb4b9aac10a08eb7631703",
+      "text": "狼"
+    },
+    "attack_power": {
+      "entity": "bfa9ccd8fe674a718a69cac4a2077d38",
+      "value": 5
+    },
+    "defence_power": {
+      "entity": "79e0939eb6764d7e832abbf73e473587",
+      "value": 3
+    },
+    "description": {
+      "entity": "810c41ad14644b1ca06c96a19fe0ee74",
+      "text": [
+        "一匹飢腸轆轆的狼。"
+      ]
+    },
+    "brief": {
+      "entity": "f2b0855c5a7944199b43ffd4fcf6972c",
+      "text": "一匹狼"
+    },
+    "hitpoint": {
+      "entity": "2e3f23d7bb5640e3ba2b0542ef415650",
+      "value": 300
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": {
+    "entity": "cd17bec429254fdcb8bac8b0300153ce",
+    "text": "鹿"
+  },
+  "attack_power": {
+    "entity": "d9ce11e95f094397a2f79bdfbe840aed",
+    "value": 1
+  },
+  "defence_power": {
+    "entity": "e770496a08b747a3a4d9c9d3e851d36b",
+    "value": 3
+  },
+  "description": {
+    "entity": "f7fe48c97c4b426888123ddc766a1be9",
+    "text": [
+      "一頭鹿站在那兒，正警戒著看著你。"
+    ]
+  },
+  "brief": {
+    "entity": "dd2eeb378e7249da8f4f5bc02c0e4202",
+    "text": "一頭遊蕩的鹿"
+  },
+  "hitpoint": {
+    "entity": "80ba7de63fd04884b06512d63b636575",
+    "value": 100
+  }
+}

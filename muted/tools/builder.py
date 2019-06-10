@@ -6,6 +6,7 @@ from typing import NamedTuple
 from typing import Optional
 from typing import Tuple
 
+from  pathlib import Path
 import json
 import uuid
 
@@ -419,8 +420,50 @@ class Zone:
     def __repr__(self) -> str:
         return '\n'.join([ ' '.join(street) for street in self._map ])
 
+def to_spec():
+    f = Path(f'./room.json')
+    tf = Path(f'./text.json')
+    vf = Path(f'./value.json')
+    tgf = Path(f'./tag.json')
+
+    print(f'------{f}-------')
+    if f.is_file():
+        spec = ''
+
+        with f.open(encoding='utf-8') as fin:
+            spec = json.load(fin)
+
+            tag = {}
+
+            for item in spec:
+                for key, value in item.items():
+                    if not 'entity' in value:
+                        if type(value) in ( bool, float, int ):
+                            item[key] = {
+                                "entity": entity,
+                                "value": value
+                            }
+                        else:
+                            item[key] = {
+                                "entity": entity,
+                                "text": value
+                            }
+
+                tag[item['tag']['text']] = {}
+
+                for key, value in item.items():
+                    tag[item['tag']['text']][key] = item[key]['entity']
+
+        with f.open(mode='w', encoding='utf-8') as fout:
+            json.dump(spec, fout, ensure_ascii=False, indent=2)
+
+        with tgf.open(mode='w', encoding='utf-8') as fout:
+            json.dump(tag, fout, ensure_ascii=False, indent=2)
+
 if __name__ == '__main__':
-    zone = Zone(17, 13)
+    zone = Zone(27, 17)
+
+    to_spec()
 
     print(zone)
 

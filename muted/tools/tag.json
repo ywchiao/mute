@@ -1,0 +1,26 @@
+{
+  "deer": {
+    "name": "9ef4c483949145b1a5936b6a23de4068",
+    "attack_power": "0e81011c1a844c65beecdc1b1d7e7953",
+    "defence_power": "94e2ce6e9eaa4d72ad252db0e99f9210",
+    "description": "ff0ac452a5b043db9d2ecb474ac5d4a9",
+    "brief": "98c1029626554558808eca169fa18ffe",
+    "hitpoint": "71512a049edc4fb88b02733cfac3fbcf"
+  },
+  "rabbit": {
+    "name": "fd41bb5b2883487ab350424547d88376",
+    "attack_power": "5badaf41c48943cd99fbfa166b359f16",
+    "defence_power": "cb86675fd5dc45108b02b3e41f6d1f74",
+    "description": "6a00ffb42aab4a439643d63ef17fb432",
+    "brief": "2ac805aede264665b6ad2cc8578ae4f4",
+    "hitpoint": "79176325e8e145d3ad5f532bccec8f15"
+  },
+  "wolf": {
+    "name": "e206acf400f54e7f97f8947a88d7d074",
+    "attack_power": "9f9876220f9c4093a3e6a105e2fceb58",
+    "defence_power": "46a4b1ae2c1e4ce6860578f50c00048b",
+    "description": "fb75ce811c6149f39ff7c19a6cad755c",
+    "brief": "621f84c368ee45ad8087d53339e8a758",
+    "hitpoint": "d425e302c2614a5cb92ac6548d5d58d3"
+  }
+}
