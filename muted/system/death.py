@@ -4,13 +4,7 @@ from __future__ import annotations
 from typing import List
 from typing import Type
 
-from component.description import Description
-from component.exit import Exit
-from component.name import Name
-from component.npc import NPC
-from component.passer import Passer
-from component.role import Role
-from component.room import Room
+from component.text_component import TextComponent
 
 from event.event import Event
 from message.message import Message

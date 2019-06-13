@@ -3,9 +3,8 @@ from __future__ import annotations
 
 from typing import Type
 
-from component.name import Name
-from component.role import Role
-from component.room import Room
+from component.link import Link
+from component.stats import Stats
 
 from event.event import Event
 from message.message import Message
@@ -32,10 +31,10 @@ class SignIn:
     def _on_sign_in(
         self, e: Event, entity: str, user_id: str = '', passwd: str = ''
     ) -> None:
-        role = Role.instance(user_id, name=user_id)
-
-        Name.instance(entity, name=role.name)
-        Room.instance(role.room).enter(entity)
+        role = Stats.text('entity', user_id)
+        Stats.update_text('binding', entity, role)
+        room = Stats.text('at_room', role)
+        Stats.list_append('guest', room, Link(entity, role))
 
         text = f'歡迎來到 MUTE: Multi-User Texting Environment'
         Channel.to_role(entity, Message.SYSTEM, text)

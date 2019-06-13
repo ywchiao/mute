@@ -4,13 +4,7 @@ from __future__ import annotations
 from typing import List
 from typing import Type
 
-from component.description import Description
-from component.exit import Exit
-from component.name import Name
-from component.npc import NPC
-from component.passer import Passer
-from component.role import Role
-from component.room import Room
+from component.stats import Stats
 
 from event.event import Event
 from message.message import Message
@@ -28,28 +22,29 @@ class CmdLook:
     def _on_cmd_look(
         self, e: Event, entity: str = '', args: List[str] = []
     ) -> None:
-        role = Role.instance(entity)
+        role_id = Stats.text('binding', entity)
+        room = Stats.text('at_room', role_id)
 
         if not args:
             text = [
-                *self._room_desc(role.room),
-                self._room_passer(role.room),
-                self._room_exit(role.room)
+                *self._room_desc(room),
+                self._room_passer(room),
+                self._room_exit(room)
             ]
         else:
-            text = self._look_at(role.room, args[0])
+            text = self._look_at(room, args[0])
 
         for line in text:
             Channel.to_role(entity, Message.TEXT, line)
 
     @LogCat.log_func
     def _look_at(self, room: str, tag: str) -> List[str]:
-        target = Passer.instance(room).with_tag(tag)
+        target = Stats.text('entity', tag)
 
         if target:
             text = [
-                f'你上下打量著[{Name.instance(target).text}]，你看見一位：',
-                *NPC.instance(target).description
+                f'你上下打量著[{Stats.text("name", target)}]，你看見：',
+                *Stats.text('description', target)
             ]
         else:
             text = [f'  你在看什麼？']
@@ -58,28 +53,29 @@ class CmdLook:
 
     @LogCat.log_func
     def _room_desc(self, room: str) -> List[str]:
-        room = Room.instance(room)
+        room_type = Stats.text('room', room)
 
         return [
-          f'{room.name} -',
-          *room.description
+          f'{Stats.text("name", room_type)}',
+          *Stats.text('description', room_type)
         ]
 
     @LogCat.log_func
     def _room_exit(self, room: str) -> str:
-        exits = Exit.instance(room)
+        exits = Stats.text('exit', room)
 
         if not exits:
             text = f'  這裡沒有出口'
         else:
-            text = f'  這裡明顯的出口有：{exits.keys()}'
+            text = f'  這裡明顯的出口有：{", ".join(exits.keys())}'
 
         return text
 
     @LogCat.log_func
     def _room_passer(self, room: str) -> str:
-        text = Passer.instance(room).list
-
-        return f'  這裡旳人有：{text}'
+        return ', '.join([
+            f'{Stats.text("name", passer)} ({Stats.text("tag", passer)})'
+            for passer in Stats.list_items('passer', room)
+        ])
 
 # cmd_look.py

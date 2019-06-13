@@ -6,9 +6,9 @@ from event.handler import Handler
 from message.message import Message
 
 from system.channel import Channel
-from system.cmd_combat import CmdCombat
 from system.cmd_echo import CmdEcho
 from system.cmd_inventory import CmdInventory
+from system.cmd_kill import CmdKill
 from system.cmd_look import CmdLook
 from system.cmd_move import CmdMove
 from system.cmd_say import CmdSay
@@ -32,9 +32,9 @@ class Servant(Handler):
         if not cls._instance:
             cls._instance = Servant()
 
-            CmdCombat(cls._instance)
             CmdEcho(cls._instance)
             CmdInventory(cls._instance)
+            CmdKill(cls._instance)
             CmdLook(cls._instance)
             CmdMove(cls._instance)
             CmdSay(cls._instance)

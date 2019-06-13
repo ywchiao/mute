@@ -1,0 +1,12 @@
+{
+  "name": "兔子",
+  "brief": "一隻兔子",
+  "description": [
+    "一隻兔子伏在那兒，耳朵伏在背後，鼻子在空中不停地抽",
+    "動著。"
+  ],
+  "attack_power": 1,
+  "defence_power": 1,
+  "hit_point": 100,
+  "entity": "18dcf8088f50425aa12940f89abf887a"
+}

@@ -1,10 +1,12 @@
 
 from __future__ import annotations
 
-from component.room import Room
+from component.stats import Stats
 
 from message.message import Message
 from message.out_stream import OutStream
+
+from logcat.logcat import LogCat
 
 class Channel:
     @staticmethod
@@ -21,7 +23,7 @@ class Channel:
 
     @staticmethod
     def to_room(entity: str, type_: str, text: str='') -> None:
-        for guest in Room.instance(entity).guests:
-            Channel.to_role(guest, type_, text)
+        for guest in Stats.list_items('guest', entity):
+            Channel.to_role(guest.entity, type_, text)
 
 # channel.py

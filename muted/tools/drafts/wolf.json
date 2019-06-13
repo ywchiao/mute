@@ -1,0 +1,11 @@
+{
+  "name": "狼",
+  "brief": "一匹狼",
+  "description": [
+    "一匹飢腸轆轆的狼。"
+  ],
+  "attack_power": 5,
+  "defence_power": 3,
+  "hit_point": 300,
+  "entity": "76bb5648a0cf470b98db05ada16d4135"
+}

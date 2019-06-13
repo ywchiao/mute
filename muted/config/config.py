@@ -57,6 +57,10 @@ class Config:
         return self._kwargs['socket']['port']
 
     @property
+    def DATA_ROOT(self) -> str:
+        return f'{self._kwargs["root"]["data"]}'
+
+    @property
     def LOG_CONFIG(self) -> str:
         return (
             f'{self._kwargs["root"]["log"]}/'

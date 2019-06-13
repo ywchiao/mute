@@ -1,11 +1,10 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Sequence
 from typing import Type
 
-from component.name import Name
-from component.role import Role
+from component.stats import Stats
 
 from event.event import Event
 from message.message import Message
@@ -20,16 +19,18 @@ class CmdSay:
 
     @LogCat.log_func
     def _on_cmd_say(
-        self, e: Event, entity: str = '', args: List[str] = []
+        self, e: Event, entity: str = '', args: Sequence[str] = []
     ) -> None:
         if not args:
-            text = f'你想說什麼？'
+            text = f'  你想說什麼？'
 
             Channel.to_role(entity, Message.TEXT, text)
         else:
-            text = f'{Name.instance(entity).text} 說：{" ".join(args)}'
+            role = Stats.text('binding', entity)
+            room = Stats.text('at_room', role)
 
-            role = Role.instance(entity)
-            Channel.to_room(role.room, Message.TEXT, text)
+            text = f'{Stats.text("name", role)} ({Stats.text("tag", role)}) 說：{" ".join(args)}'
+
+            Channel.to_room(room, Message.TEXT, text)
 
 # cmd_say.py

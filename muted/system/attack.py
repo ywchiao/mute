@@ -1,99 +1,78 @@
 
 from __future__ import annotations
 
-from typing import List
-from typing import Tuple
-
 import random
-import time
 
-from component.atk_power import AtkPower
-from component.genus import Genus
 from component.hit_point import HitPoint
-from component.name import Name
+from component.link import Link
+from component.stats import Stats
+
 from event.event import Event
 
 from message.message import Message
 from system.channel import Channel
-from system.regen import Regen
+from system.heal_over_time import HealOverTime
+from system.timed_task import TimedTask
 
 from logcat.logcat import LogCat
 
 class Attack:
-    _instance: Attack = None
+    TICK_NORMAL: float = 1.5
 
     @LogCat.log_func
-    def __init__(self):
-        self._queue: List[Tuple(str, str, int)] = []
+    def __init__(self, attacker: Link, defender: Link):
+        self._attacker = attacker
+        self._defender = defender
 
-    @classmethod
-    def instance(cls) -> Attack:
-        if not cls._instance:
-            cls._instance = Attack()
+    def update(self) -> bool:
+        attacker = self._attacker
+        defender = self._defender
 
-        return cls._instance
+        damage = random.randint(1, Stats.attack_power(attacker.role))
 
-    @LogCat.log_func
-    def enlist(self, attacker: str, defender: str) -> None:
-        self._queue.append((attacker, defender, time.time_ns()))
-        self._queue.append((defender, attacker, time.time_ns()))
+        hp = HitPoint.value(defender.role) - damage
+        HitPoint.update(defender.role, hp if hp > 0 else 0)
 
-#        self._attack(attacker, defender)
+        if not HitPoint.value(defender.role):
+            if attacker.entity:
+                Channel.to_role(
+                    attacker.entity,
+                    Message.TEXT,
+                    f'  [{Stats.text("name", defender.role)}]被'
+                    f'[{Stats.text("name", attacker.role)}] 殺死了。'
+                )
 
-    def update(self, t_ns: int) -> None:
-        queue = []
+            if defender.entity:
+                Channel.to_role(
+                    defender.entity,
+                    Message.TEXT,
+                    f'  [{Stats.text("name", defender.role)}]被'
+                    f'[{Stats.text("name", attacker.role)}] 殺死了。'
+                )
 
-        for a, d, t in self._queue:
-            if t_ns - t > 1500000000:
-                self._attack(a, d)
-
-                if HitPoint.instance(a).value and HitPoint.instance(d).value:
-                    queue.append((a, d, t + 1500000000))
-            else:
-                queue.append((a, d, t))
-
-        self._queue = queue
-
-    def _attack(self, attacker: str, defender: str) -> bool:
-        damage = random.randint(1, AtkPower.instance(attacker).value)
-        HitPoint.instance(defender).lose(damage)
-
-        Channel.to_role(
-            attacker,
-            Message.TEXT,
-            f'  你對[{Name.instance(Genus.instance(defender)).text}]'
-            f'的普通攻擊造成了{damage}點傷害。'
-        )
-
-        Channel.to_role(
-            defender,
-            Message.TEXT,
-            f'  [{Name.instance(Genus.instance(attacker)).text}]'
-            f'對你的普通攻擊造成了{damage}點傷害。'
-        )
-
-        if not HitPoint.instance(defender).value:
-            Channel.to_role(
-                attacker,
-                Message.TEXT,
-                f'  [{Name.instance(Genus.instance(defender)).text}]被'
-                f'[{Name.instance(Genus.instance(attacker)).text}]殺死了。'
+            TimedTask.schedule(
+                HealOverTime(attacker.role, HealOverTime.HEAL_DEFAULT),
+                HealOverTime.TICK_NORMAL
             )
+        else:
+            if attacker.entity:
+                Channel.to_role(
+                    attacker.entity,
+                    Message.TEXT,
+                    f'  你對[{Stats.text("name", defender.role)}]'
+                    f'的普通攻擊造成了 {damage}點傷害。'
+                )
 
-            Channel.to_role(
-                defender,
-                Message.TEXT,
-                f'  [{Name.instance(Genus.instance(defender)).text}] 被'
-                f'[{Name.instance(Genus.instance(attacker)).text}] 殺死了。'
-            )
+            if defender.entity:
+                Channel.to_role(
+                    defender.entity,
+                    Message.TEXT,
+                    f'  [{Stats.text("name", attacker.role)}]'
+                    f'對你的普通攻擊造成了 {damage}點傷害。'
+                )
 
-#            Event.trigger(
-#                Event(
-#                    Event.DEATH, Servant.instance(),
-                    #entity=defender
-#                )
-#            )
-
-            Regen.instance().enlist(HitPoint.instance(attacker))
+        return not (
+            HitPoint.value(defender.role) and HitPoint.value(attacker.role)
+        )
 
 # attack.py

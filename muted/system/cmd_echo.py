@@ -1,11 +1,8 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Sequence
 from typing import Type
-
-from component.name import Name
-from component.role import Role
 
 from event.event import Event
 from message.message import Message
@@ -20,7 +17,7 @@ class CmdEcho:
 
     @LogCat.log_func
     def _on_cmd_echo(
-        self, e: Event, entity: str = '', args: List[str] = []
+        self, e: Event, entity: str = '', args: Sequence[str] = []
     ) -> None:
         text = f'ECHO 說：{" ".join(args)}'
 

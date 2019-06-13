@@ -1,17 +1,11 @@
 
 from __future__ import annotations
 
-from typing import List
+from typing import Sequence
 from typing import Type
 
-from component.name import Name
-from component.role import Role
-from component.atk_power import AtkPower
-from component.atr_str import AtrStr
-from component.def_power import DefPower
-from component.exp_point import ExpPoint
 from component.hit_point import HitPoint
-from component.level import Level
+from component.stats import Stats
 
 from event.event import Event
 from message.message import Message
@@ -27,16 +21,18 @@ class CmdScore:
 
     @LogCat.log_func
     def _on_cmd_score(
-        self, e: Event, entity: str = '', args: List[str] = []
+        self, e: Event, entity: str = '', args: Sequence[str] = []
     ) -> None:
+        role = Stats.text('binding', entity)
+
         score = [
             f'你目前的狀態是：',
-            f'  姓名：{Name.instance(entity).text}',
-            f'  等級：{Level.instance(entity).value}',
-            f'  攻擊力：{AtkPower.instance(entity).value}',
-            f'  防禦力：{DefPower.instance(entity).value}',
-            f'  血量：{HitPoint.instance(entity).value}/{HitPoint.instance(entity).max_value}',
-            f'  經驗值：{ExpPoint.instance(entity).value}'
+            f'  姓名：{Stats.text("name", role)}',
+            f'  等級：{Stats.value("level", role)}',
+            f'  攻擊力：{Stats.attack_power(role)}',
+            f'  防禦力：{Stats.defence_power(role)}',
+            f'  血量：{HitPoint.value(role)}/{HitPoint.max(role)}',
+            f'  經驗值：{Stats.value("exp_point", role)}/(...)'
         ]
 
         for text in score:

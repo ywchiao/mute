@@ -1,0 +1,11 @@
+{
+  "name": "鹿",
+  "brief": "一頭遊蕩的鹿",
+  "description": [
+    "一頭鹿站在那兒，正警戒著看著你。"
+  ],
+  "attack_power": 1,
+  "defence_power": 3,
+  "hit_point": 100,
+  "entity": "e4e9e9a6cff6404aa35326650ee74b39"
+}

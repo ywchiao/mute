@@ -6,16 +6,20 @@ from typing import NamedTuple
 from typing import Optional
 from typing import Tuple
 
-from  pathlib import Path
-import json
-import uuid
+from pathlib import Path
 
 from random import randint
 
-class Entity:
-    @staticmethod
-    def eid() -> str:
-        return uuid.uuid4().hex
+import json
+
+from component.text_component import TextComponent
+
+from entity.entity import Entity
+
+TEXT_COMPONENT = (
+    'room',
+    'exit'
+)
 
 class Seeking(NamedTuple):
     start: int
@@ -149,6 +153,13 @@ class Zone:
             int(self._height * .33),
             int(self._height * .67)
         )
+
+        self._components: Mapping[str, Type[Component]] = {}
+
+        for component in TEXT_COMPONENT:
+            self._components[component] = TextComponent.instance(component)
+
+        self._entity_component = TextComponent.instance('entity')
 
         self._buildings: List[Node] = []
         self._facing: List[str] = []
@@ -299,6 +310,7 @@ class Zone:
     def _fix_path(self, path: List[Vectex]) -> None:
         for x, y in path:
             self._map[y][x] = Zone.STREET
+            self._pavements.append(Vertex(x, y))
 
     def _fix_road(self) -> None:
         r = randint(0, 1)
@@ -317,7 +329,7 @@ class Zone:
             randint(int(self._height * .75), int(self._height * .80))
         )
 
-        self._fix_line(Vertex(x, 0), Vertex(x, y))
+        self._fix_line(Vertex(x, 0), Vertex(x, y + 1))
 
         r = randint(0, 1)
 
@@ -335,7 +347,7 @@ class Zone:
             randint(int(self._width * .75), int(self._width * .80))
         )
 
-        self._fix_line(Vertex(0, y), Vertex(x, y))
+        self._fix_line(Vertex(0, y), Vertex(x + 1, y))
 
     def _fix_street(self):
         for src in self._buildings:
@@ -373,20 +385,24 @@ class Zone:
                     self._facing.append(Zone.WEST)
 
     def publish(self) -> None:
-        cache: Map[str, Room] = {}
+        cache: Mapping[str, str] = {}
+        room_component = self._components['room']
+        exit_component = self._components['exit']
 
-        for n in self._buildings:
-            cache[f'{n.x}x{n.y}'] = Room(self._map[n.y][n.x])
+        for n in (*self._buildings, *self._pavements):
+            entity = Entity.eid()
+            cache[f'{n.x}x{n.y}'] = entity
+            room_component.update(
+                entity,
+                self._entity_component.text(Zone.TAG[self._map[n.y][n.x]])
+            )
 
-        for v in self._pavement:
-            cache[f'{v.x}x{v.y}'] = Room(self._map[v.y][v.x])
+        for v in self._pavements:
+            exits = {}
 
-        for v in self._pavement:
-            room = cache[f'{v.x}x{v.y}']
-
-            for i, vec in (
+            for i, vec in enumerate((
                 Vertex(0, -1), Vertex(-1, 0), Vertex(0, 1), Vertex(1, 0)
-            ):
+            )):
                 x = v.x + vec.x
                 y = v.y + vec.y
 
@@ -401,70 +417,51 @@ class Zone:
                 if self._map[y][x] == Zone.BLOCK:
                     continue
 
-                room.add_exit('nwse'[i], cache[f'{x}x{y}'].entity)
+                print(f'... type -- {self._map[y][x]} --- x: {x} --- y: {y}')
 
-        for i, n in enumerate(self._building):
+                exits['nwse'[i]] = cache[f'{x}x{y}']
+
+            exit_component.update(cache[f'{v.x}x{v.y}'], exits)
+
+        for i, n in enumerate(self._buildings):
             room = cache[f'{n.x}x{n.y}']
 
             if self._facing[i] == '^':
-                room.add_exit('n', cache[f'{n.x}x{n.y - 1}'].entity)
+                exit_component.update(
+                    room,
+                    { 'n': cache[f'{n.x}x{n.y - 1}'] }
+                )
             elif self._facing[i] == '<':
-                room.add_exit('w', cache[f'{n.x - 1}x{n.y}'].entity)
+                exit_component.update(
+                    room,
+                    { 'w': cache[f'{n.x - 1}x{n.y}'] }
+                )
             elif self._facing[i] == 'v':
-                room.add_exit('s', cache[f'{n.x}x{n.y + 1}'].entity)
+                exit_component.update(
+                    room,
+                    { 's': cache[f'{n.x}x{n.y + 1}'] }
+                )
             elif self._facing[i] == '>':
-                room.add_exit('e', cache[f'{n.x + 1}x{n.y}'].entity)
+                exit_component.update(
+                    room,
+                    { 'e': cache[f'{n.x + 1}x{n.y}'] }
+                )
             else:
                 print(f'Panic! Facing error!')
+
+#        for key, value in self._components.items():
+#            value.save(key)
+
+    def mini_map(self) -> str:
+        return '\n'.join([ ' '.join(street) for street in self._map ])
 
     def __repr__(self) -> str:
         return '\n'.join([ ' '.join(street) for street in self._map ])
 
-def to_spec():
-    f = Path(f'./room.json')
-    tf = Path(f'./text.json')
-    vf = Path(f'./value.json')
-    tgf = Path(f'./tag.json')
-
-    print(f'------{f}-------')
-    if f.is_file():
-        spec = ''
-
-        with f.open(encoding='utf-8') as fin:
-            spec = json.load(fin)
-
-            tag = {}
-
-            for item in spec:
-                for key, value in item.items():
-                    if not 'entity' in value:
-                        if type(value) in ( bool, float, int ):
-                            item[key] = {
-                                "entity": entity,
-                                "value": value
-                            }
-                        else:
-                            item[key] = {
-                                "entity": entity,
-                                "text": value
-                            }
-
-                tag[item['tag']['text']] = {}
-
-                for key, value in item.items():
-                    tag[item['tag']['text']][key] = item[key]['entity']
-
-        with f.open(mode='w', encoding='utf-8') as fout:
-            json.dump(spec, fout, ensure_ascii=False, indent=2)
-
-        with tgf.open(mode='w', encoding='utf-8') as fout:
-            json.dump(tag, fout, ensure_ascii=False, indent=2)
-
 if __name__ == '__main__':
     zone = Zone(27, 17)
+    zone.publish()
 
-    to_spec()
-
-    print(zone)
+    print(zone.mini_map())
 
 # builder.py
