@@ -16,11 +16,6 @@ from component.text_component import TextComponent
 
 from entity.entity import Entity
 
-from tools.grid import Block
-from tools.grid import Grid
-from tools.node import Node
-from tools.vertex import Vertex
-
 TEXT_COMPONENT = (
     'room',
     'exit'
@@ -31,6 +26,78 @@ class Seeking(NamedTuple):
     fixed: int
     step: int
     vertical: bool
+
+class Vertex(NamedTuple):
+    x: int
+    y: int
+
+class Node:
+    """A node class for A* Pathfinding"""
+    def __init__(
+        self, vertex: Vertex, parent: Optional[Node] = None
+    ):
+        self._parent = parent
+        self._vertex = vertex
+
+        self._g = parent.g + 1 if parent else 0
+        self._h = 0
+
+    @property
+    def f(self):
+        return self._g + self._h
+
+    @property
+    def g(self) -> int:
+        return self._g
+
+    @property
+    def h(self) -> int:
+        return self._h
+
+    @h.setter
+    def h(self, h: int) -> None:
+        self._h = h
+
+    @property
+    def parent(self) -> Node:
+        return self._parent
+
+    @property
+    def vertex(self) -> Vertex:
+        return self._vertex
+
+    @property
+    def x(self) -> int:
+        return self._vertex.x
+
+    @property
+    def y(self) -> int:
+        return self._vertex.y
+
+    def __eq__(self, other: Node) -> bool:
+        return self.vertex == other.vertex
+
+class Room:
+    def __init__(self, tag: str):
+        self._entity: str = Entity.eid()
+
+        self._exit: Map[str, str] = {}
+
+        self._desc = ''
+        self._brief = ''
+        self._name = ''
+        self._tag = ''
+
+    def add_exit(self, d: str, to: str) -> None:
+        self._exit[d] = to
+
+    @property
+    def entity(self) -> str:
+        return self._entity
+
+    @property
+    def vertex(self) -> Vertex:
+        return self._vertex
 
 class Zone:
     BLOCK: str = ' '
@@ -50,29 +117,9 @@ class Zone:
     EAST: str = '>'
     WEST: str = '<'
 
-    BUILDING: Tuple[Block] = (
-        Block.BANK,
-        Block.BLACKSMITH,
-        Block.CLOTHING_STORE,
-        Block.GROCERY_STORE,
-        Block.HERBAL_SHOP,
-        Block.INN,
-        Block.PAWN_SHOP,
-        Block.TAVERN
-    )
-
-    GROUND: Tuple[Block] = (
-        Block.BLOCK,
-        Block.CROSS,
-        Block.STREET,
-        Block.T_SHAPE
-    )
-
-    PAVEMENT: Tuple[Block] = (
-        Block.STREET,
-        Block.CROSS,
-        Block.T_SHAPE
-    )
+    PAVEMENT: str = '.+-'
+    BUILDING: str = 'SHGCIPTB'
+    GROUND: str = ' .+-'
 
     TAG: Map[str, str] = {
         '.': 'street',
@@ -89,16 +136,22 @@ class Zone:
     }
 
     def __init__(self, width: int, height: int):
-        self._map = Grid(width, height)
+        self._width = width
+        self._height = height
+
+        self._map: List[List[str]] = [
+            [ Zone.BLOCK for x in range(width) ]
+            for y in range(height)
+        ]
 
         self._axis_x: Tuple[int, int] = (
-            int(width * .33),
-            int(width * .67)
+            int(self._width * .33),
+            int(self._width * .67)
         )
 
         self._axis_y: Tuple[int, int] = (
-            int(height * .33),
-            int(height * .67)
+            int(self._height * .33),
+            int(self._height * .67)
         )
 
         self._components: Mapping[str, Type[Component]] = {}
@@ -113,9 +166,9 @@ class Zone:
         self._pavements: List[Vertex] = []
 
         self._fix_housing()
-#        self._fix_street()
-#        self._fix_road()
-#        self._fix_junction()
+        self._fix_street()
+        self._fix_road()
+        self._fix_junction()
 
     def find(self, src: Node, dst: Node) -> Sequence[Vertex]:
         openned: List[Node] = [ src ]
@@ -138,7 +191,7 @@ class Zone:
                 current: Optional[Node] = node
 
                 while current:
-                    path.append(Vertex(current.x, current.y))
+                    path.append(current.vertex)
                     current = current.parent
 
                 return path[::-1] # Return reversed path
@@ -178,16 +231,16 @@ class Zone:
 
             if (
                 x < 0 or
-                x >= self._map.width or
+                x >= self._width or
                 y < 0 or
-                y >= self._map.height
+                y >= self._height
             ):
                 continue
 
-            if not self._map.cell(x, y) in Zone.GROUND:
+            if not self._map[y][x] in Zone.GROUND:
                 continue
 
-            child_list.append(Node(node, x, y))
+            child_list.append(Node(Vertex(x, y), node))
 
         return child_list
 
@@ -219,27 +272,19 @@ class Zone:
         return counts
 
     def _fix_housing(self):
-        for i in range(0, len(Zone.BUILDING)):
-            x = randint(
-                int(self._map.width * .20), int(self._map.width * .80)
-            )
-            y = randint(
-                int(self._map.height * .20), int(self._map.height * .80)
-            )
+        for t in range(0, len(Zone.BUILDING)):
+            x = randint(int(self._width * .20), int(self._width * .80))
+            y = randint(int(self._height * .20), int(self._height * .80))
 
             while (
-                (not self._map.cell(x, y) == Block.BLOCK) or
+                (not self._map[y][x] == Zone.BLOCK) or
                 (x in self._axis_x) or
                 (y in self._axis_y)
             ):
-                x = randint(
-                    int(self._map.width * .20), int(self._map.width * .80)
-                )
-                y = randint(
-                    int(self._map.height * .20), int(self._map.height * .80)
-                )
+                x = randint(int(self._width * .20), int(self._width * .80))
+                y = randint(int(self._height * .20), int(self._height * .80))
 
-            self._map.update(x, y, Zone.BUILDING[i])
+            self._map[y][x] = Zone.BUILDING[t]
 
             self._buildings.append(Node(Vertex(x, y)))
 
@@ -349,9 +394,7 @@ class Zone:
             cache[f'{n.x}x{n.y}'] = entity
             room_component.update(
                 entity,
-                self._entity_component.text(
-                    self._map.cell(n.x, n.y).name.lower()
-                )
+                self._entity_component.text(Zone.TAG[self._map[n.y][n.x]])
             )
 
         for v in self._pavements:
@@ -371,8 +414,10 @@ class Zone:
                 ):
                     continue
 
-                if self._map.cell(x, y) == Block.BLOCK:
+                if self._map[y][x] == Zone.BLOCK:
                     continue
+
+                print(f'... type -- {self._map[y][x]} --- x: {x} --- y: {y}')
 
                 exits['nwse'[i]] = cache[f'{x}x{y}']
 
@@ -381,31 +426,31 @@ class Zone:
         for i, n in enumerate(self._buildings):
             room = cache[f'{n.x}x{n.y}']
 
-#            if self._facing[i] == '^':
-#                exit_component.update(
-#                    room,
-#                    { 'n': cache[f'{n.x}x{n.y - 1}'] }
-                #)
-#            elif self._facing[i] == '<':
-#                exit_component.update(
-#                    room,
-#                    { 'w': cache[f'{n.x - 1}x{n.y}'] }
-#                )
-#            elif self._facing[i] == 'v':
-#                exit_component.update(
-#                    room,
-#                    { 's': cache[f'{n.x}x{n.y + 1}'] }
-#                )
-#            elif self._facing[i] == '>':
-#                exit_component.update(
-#0                    room,
-#                    { 'e': cache[f'{n.x + 1}x{n.y}'] }
-#                )
-#            else:
-#                print(f'Panic! Facing error!')
+            if self._facing[i] == '^':
+                exit_component.update(
+                    room,
+                    { 'n': cache[f'{n.x}x{n.y - 1}'] }
+                )
+            elif self._facing[i] == '<':
+                exit_component.update(
+                    room,
+                    { 'w': cache[f'{n.x - 1}x{n.y}'] }
+                )
+            elif self._facing[i] == 'v':
+                exit_component.update(
+                    room,
+                    { 's': cache[f'{n.x}x{n.y + 1}'] }
+                )
+            elif self._facing[i] == '>':
+                exit_component.update(
+                    room,
+                    { 'e': cache[f'{n.x + 1}x{n.y}'] }
+                )
+            else:
+                print(f'Panic! Facing error!')
 
-#        for key, value in self._components.items():
-#            value.save(key)
+        for key, value in self._components.items():
+            value.save(key)
 
     def mini_map(self) -> str:
         return '\n'.join([ ' '.join(street) for street in self._map ])
