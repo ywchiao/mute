@@ -2,36 +2,22 @@
 from __future__ import annotations
 
 from typing import List
-from typing import NamedTuple
-from typing import Optional
+from typing import Mapping
 from typing import Tuple
 
 from pathlib import Path
 
 from random import randint
 
-import json
-
-from component.text_component import TextComponent
+from component.stats import Stats
 
 from entity.entity import Entity
 
 from tools.block import Block
+from tools.building import Building
 from tools.facing import Facing
 from tools.grid import Grid
-from tools.node import Node
 from tools.vertex import Vertex
-
-TEXT_COMPONENT = (
-    'room',
-    'exit'
-)
-
-class Seeking(NamedTuple):
-    start: int
-    fixed: int
-    step: int
-    vertical: bool
 
 class Zone:
     BUILDING: Tuple[Block] = (
@@ -49,30 +35,10 @@ class Zone:
         Block.WORKSHOP
     )
 
-    GROUND: Tuple[Block] = (
-        Block.BLOCK,
-        Block.CROSSROAD,
-        Block.STREET_H,
-        Block.STREET_V,
-        Block.T_RIGHT,
-        Block.T_LEFT,
-        Block.T_TOP,
-        Block.T_BOTTOM
-    )
-
     def __init__(self, width: int, height: int):
         self._map = Grid(width, height)
 
-        self._components: Mapping[str, Type[Component]] = {}
-
-        for component in TEXT_COMPONENT:
-            self._components[component] = TextComponent.instance(component)
-
-        self._entity_component = TextComponent.instance('entity')
-
-        self._buildings: List[Node] = []
-        self._facing: List[Facing] = []
-        self._pavements: Mapping[str, Vertex] = {}
+        self._buildings: List[Building] = []
         self._crossroads: Tuple[Vertex] = (
             Vertex(
                 randint(int(width * .29), int(width * .37)),
@@ -84,86 +50,128 @@ class Zone:
             )
         )
 
-        self._fix_road(width, height)
-        self._fix_housing(width, height)
+        self._fix_building(width, height)
         self._fix_street()
-        self._fix_line(width, height)
+        self._fix_road(width, height)
+        self._fix_facing()
 
-    def find(self, src: Node, dst: Node) -> Sequence[Vertex]:
-        openned: List[Node] = [ src ]
-        closed: List[Node] = []
+    def mini_map(self) -> str:
+        return str(self)
 
-        while openned:
-            node: Node = openned[0]
-            index: int = 0
+    def publish(self) -> None:
+        cache: Mapping[str, dict] = {}
 
-            for idx, current in enumerate(openned):
-                if current.f < node.f:
-                    node = current
-                    index = idx
+        for x in range(0, self._map.width):
+            for y in range(0, self._map.height):
+                if not self._map.empty(x, y):
+                    entity = Entity.eid()
+                    cache[f'{x}x{y}'] = {
+                        'entity': entity,
+                        'vertex': Vertex(x, y)
+                    }
 
-            openned.pop(index)
-            closed.append(node)
-
-            if node == dst:
-                path: List[Vertex] = []
-                current: Optional[Node] = node
-
-                while current:
-                    path.append(Vertex(current.x, current.y))
-                    current = current.parent
-
-                return path[::-1] # Return reversed path
-
-            for node in self._child_list(node):
-                if self._has_visited(node, closed):
-                    continue
-
-                for current in openned:
-                    if current == node and current.g >= node.g:
-                        break
-                else:
-                    node.h = (
-                        ((node.x - dst.x) ** 2) +
-                        ((node.y - dst.y) ** 2)
+                    Stats.update_text(
+                        'room',
+                        entity,
+                        Stats.text(
+                            'entity', 
+                            self._map.cell(x, y).name.lower()
+                        )
                     )
 
-                    openned.append(node)
+        for c in cache.values():
+            exits = {}
 
-    def _has_visited(self, node: Node, node_list: List[Node]) -> bool:
-        visited: bool = True
+            entity = c['entity']
+            vertex = c['vertex']
 
-        for current in node_list:
-            if current == node:
-                break
-        else:
-            visited = False
+            block = self._map.cell(vertex.x, vertex.y)
 
-        return visited
-
-    def _child_list(self, node: Node) -> Sequence[Node]:
-        child_list: List[Node] = []
-
-        for x_step, y_step in ((0, -1), (-1, 0), (0, 1), (1, 0)):
-            x = node.x + x_step
-            y = node.y + y_step
-
-            if (
-                x < 0 or
-                x >= self._map.width or
-                y < 0 or
-                y >= self._map.height
+            if block in (
+                Block.STREET_V,
+                Block.CROSSROAD,
+                Block.CORNER_SW,
+                Block.CORNER_SE,
+                Block.T_BOTTOM,
+                Block.T_LEFT,
+                Block.T_RIGHT
             ):
-                continue
+                if vertex.y > 0:
+                    exits['n'] = cache[f'{vertex.x}x{vertex.y - 1}']['entity']
 
-            if not self._map.cell(x, y) in Zone.GROUND:
-                continue
+            if block in (
+                Block.STREET_V,
+                Block.CROSSROAD,
+                Block.CORNER_NW,
+                Block.CORNER_NE,
+                Block.T_TOP,
+                Block.T_LEFT,
+                Block.T_RIGHT
+            ):
+                if vertex.y < self._map.height - 1:
+                    exits['s'] = cache[f'{vertex.x}x{vertex.y + 1}']['entity']
 
-            child_list.append(Node(Vertex(x, y), node))
+            if block in (
+                Block.STREET_H,
+                Block.CROSSROAD,
+                Block.CORNER_SW,
+                Block.CORNER_NW,
+                Block.T_TOP,
+                Block.T_BOTTOM,
+                Block.T_LEFT
+            ):
+                if vertex.x < self._map.width - 1:
+                    exits['e'] = cache[f'{vertex.x + 1}x{vertex.y}']['entity']
 
-        return child_list
+            if block in (
+                Block.STREET_H,
+                Block.CROSSROAD,
+                Block.CORNER_SE,
+                Block.CORNER_NE,
+                Block.T_TOP,
+                Block.T_BOTTOM,
+                Block.T_RIGHT
+            ):
+                if vertex.x > 0:
+                    exits['w'] = cache[f'{vertex.x - 1}x{vertex.y}']['entity']
 
-    def _fix_housing(self, w: int, h: int):
+            Stats.update_text('exit', entity, exits)
+
+        for b in self._buildings:
+            if b.facing == Facing.EAST:
+                exit = { 'e': cache[f'{b.x + 1}x{b.y}']['entity'] }
+            elif b.facing == Facing.WEST:
+                exit = { 'w': cache[f'{b.x - 1}x{b.y}']['entity'] }
+            elif b.facing == Facing.NORTH:
+                exit = { 'n': cache[f'{b.x}x{b.y - 1}']['entity'] }
+            elif b.facing == Facing.SOUTH:
+                exit = { 's': cache[f'{b.x}x{b.y + 1}']['entity'] }
+
+            Stats.update_text('exit', cache[f'{b.x}x{b.y}']['entity'], exits)
+
+        Stats.save('exit')
+        Stats.save('room')
+
+        f = Path(f'./tools/data/{Entity.eid()}.map')
+
+        with f.open(mode='w', encoding='utf-8') as fout:
+            fout.write(self.mini_map())
+
+    def _check_facing(self, s: Vertex, d: Vertex) -> Facing:
+        facing: Facing = Facing.NORTH
+
+        if s.x > d.x:
+            facing = Facing.WEST
+        elif s.x < d.x:
+            facing = Facing.EAST
+        elif s.y > d.y:
+            facing = Facing.NORTH
+        else:
+            facing = Facing.SOUTH
+
+        return facing
+
+    def _fix_building(self, w: int, h: int):
         x = randint(int(w * .20), int(w * .80))
         y = randint(int(h * .20), int(h * .80))
 
@@ -176,152 +184,266 @@ class Zone:
                 y = randint(int(h * .20), int(h * .80))
 
             self._map.update(x, y, b)
-            self._buildings.append(Node(Vertex(x, y)))
+            self._buildings.append(Building(x, y, b))
 
-    def _on_axis(self, x: int, y: int) -> bool:
-        on = True
-
-        for v in self._crossroads:
-            if x == v.x or y == v.y:
-                break
-        else:
-            on = False
-
-        return on
-
-    def _fix_line(self, w: int, h: int) -> None:
-        x = self._crossroads[0].x
-        y = 0
-
-        if self._map.cell(x, y) == Block.BLOCK:
-            while self._map.cell(x, y) == Block.BLOCK:
-                y += 1
-
-            self._fix_corner_nw(x, y)
-            self._fix_vline(x, y + 1, h)
-        else:
-            y = h - 1
-
-            while self._map.cell(x, y) == Block.BLOCK:
-                y -= 1
-
-            self._fix_corner_sw(x, y)
-            self._fix_vline(x, self._crossroads[0].y, y)
-
-    def _fix_corner_nw(self, x: int, y: int) -> None:
-        if self._map.cell(x - 1, y) == Block.BLOCK:
-            if self._map.cell(x + 1, y) == Block.BLOCK:
-                b = Block.T_TOP
-            else:
-                b = Block.CORNER_NW
-        else:
-            if self._map.cell(x + 1, y) == Block.BLOCK:
-                b = Block.CORNER_NE
-            else:
+    def _fix_corner_b2t(self, x: int, y: int) -> None:
+        if self._map.empty(x - 1, y):
+            if self._map.empty(x + 1, y):
                 b = Block.STREET_V
-
-        self._map.update(x, y, b)
-
-    def _fix_corner_sw(self, x: int, y: int) -> None:
-        if self._map.cell(x - 1, y) == Block.BLOCK:
-            if self._map.cell(x + 1, y) == Block.BLOCK:
-                b = Block.T_BOTTOM
             else:
                 b = Block.CORNER_SW
         else:
-            if self._map.cell(x + 1, y) == Block.BLOCK:
+            if self._map.empty(x + 1, y):
                 b = Block.CORNER_SE
             else:
-                b = Block.STREET_V
+                b = Block.T_BOTTOM
 
         self._map.update(x, y, b)
 
+    def _fix_corner_l2r(self, x: int, y: int) -> None:
+        if self._map.empty(x, y - 1):
+            if self._map.empty(x, y + 1):
+                b = Block.STREET_H
+            else:
+                b = Block.CORNER_NW
+        else:
+            if self._map.empty(x, y + 1):
+                b = Block.CORNER_SW
+            else:
+                b = Block.T_LEFT
+
+        self._map.update(x, y, b)
+
+    def _fix_corner_r2l(self, x: int, y: int) -> None:
+        if self._map.empty(x, y - 1):
+            if self._map.empty(x, y + 1):
+                b = Block.STREET_H
+            else:
+                b = Block.CORNER_NE
+        else:
+            if self._map.empty(x, y + 1):
+                b = Block.CORNER_SE
+            else:
+                b = Block.T_RIGHT
+
+        self._map.update(x, y, b)
+
+    def _fix_corner_t2b(self, x: int, y: int) -> None:
+        if self._map.empty(x - 1, y):
+            if self._map.empty(x + 1, y):
+                b = Block.STREET_V
+            else:
+                b = Block.CORNER_NW
+        else:
+            if self._map.empty(x + 1, y):
+                b = Block.CORNER_NE
+            else:
+                b = Block.T_TOP
+
+        self._map.update(x, y, b)
+
+    def _fix_facing(self):
+        for b in self._buildings:
+            if not b.facing == Facing.NORTH:
+                block = self._map.cell(b.x, b.y - 1)
+
+                if block == Block.CROSSROAD:
+                    self._map.update(b.x, b.y - 1, Block.T_BOTTOM)
+                elif block == Block.T_TOP:
+                    self._map.update(b.x, b.y - 1, Block.STREET_H)
+
+            if not b.facing == Facing.WEST:
+                block = self._map.cell(b.x - 1, b.y)
+
+                if block == Block.CROSSROAD:
+                    self._map.update(b.x - 1, b.y, Block.T_RIGHT)
+                elif block == Block.T_LEFT:
+                    self._map.update(b.x - 1, b.y, Block.STREET_V)
+
+            if not b.facing == Facing.SOUTH:
+                block = self._map.cell(b.x, b.y + 1)
+
+                if block == Block.CROSSROAD:
+                    self._map.update(b.x, b.y + 1, Block.T_TOP)
+                elif block == Block.T_BOTTOM:
+                    self._map.update(b.x, b.y + 1, Block.STREET_H)
+
+            if not b.facing == Facing.EAST:
+                block = self._map.cell(b.x + 1, b.y)
+
+                if block == Block.CROSSROAD:
+                    self._map.update(b.x + 1, b.y, Block.T_LEFT)
+                elif block == Block.T_RIGHT:
+                    self._map.update(b.x + 1, b.y, Block.STREET_V)
+
     def _fix_hline(self, y: int, s: int, d: int) -> None:
         for x in range(s, d):
-            if self._map.cell(x, y) == Block.BLOCK:
-                self._map.update(x, y, Block.STREET_H)
-            elif self._map.cell(x, y) == Block.STREET_V:
-                self._map.update(x, y, Block.CROSSROAD)
+            if self._map.empty(x, y - 1):
+                if self._map.empty(x, y + 1):
+                    self._map.update(x, y, Block.STREET_H)
+                else:
+                    self._map.update(x, y, Block.T_TOP)
+            else:
+                if self._map.empty(x, y + 1):
+                    self._map.update(x, y, Block.T_BOTTOM)
+                else:
+                    self._map.update(x, y, Block.CROSSROAD)
 
-    def _fix_vline(self, x: int, s: int, d: int) -> None:
-        for y in range(s, d):
-            if self._map.cell(x, y) == Block.BLOCK:
-                self._map.update(x, y, Block.STREET_V)
-            elif self._map.cell(x, y) == Block.STREET_H:
-                self._map.update(x, y, Block.CROSSROAD)
-
-    def _fix_path(self, path: List[Vertex]) -> None:
+    def _fix_lane(self, path: List[Vertex]) -> None:
         u = path[0]
 
-        for v in path[1:-1]:
+        for v in path[1:]:
             if v.x == u.x:
                 self._map.update(v.x, v.y, Block.STREET_V)
             else:
                 self._map.update(v.x, v.y, Block.STREET_H)
 
-            self._pavements[f'{v.x}x{v.y}]'] = v
+            u = v
+
+    def _fix_path(self, path: List[Vertex]) -> None:
+        u = path[0]
+
+        for i in range(1, len(path) - 1):
+            v = path[i]
+
+            t = path[i + 1]
+
+            if v.y > t.y:
+                if v.x < u.x:
+                    self._map.update(v.x, v.y, Block.CORNER_SW)
+                elif v.x > u.x:
+                    self._map.update(v.x, v.y, Block.CORNER_SE)
+                else:
+                    self._map.update(v.x, v.y, Block.STREET_V)
+            elif v.y < t.y:
+                if v.x < u.x:
+                    self._map.update(v.x, v.y, Block.CORNER_NW)
+                elif v.x > u.x:
+                    self._map.update(v.x, v.y, Block.CORNER_NE)
+                else:
+                    self._map.update(v.x, v.y, Block.STREET_V)
+            elif v.x < t.x:
+                if v.y < u.y:
+                    self._map.update(v.x, v.y, Block.CORNER_NW)
+                elif v.y > u.y:
+                    self._map.update(v.x, v.y, Block.CORNER_SW)
+                else:
+                    self._map.update(v.x, v.y, Block.STREET_H)
+            elif v.x > t.x:
+                if v.y < u.y:
+                    self._map.update(v.x, v.y, Block.CORNER_NE)
+                elif v.y > u.y:
+                    self._map.update(v.x, v.y, Block.CORNER_SE)
+                else:
+                    self._map.update(v.x, v.y, Block.STREET_H)
 
             u = v
 
-        v = path[-1]
-        block = None
-
-        if u.x == v.x:
-            if u.y < v.y:
-                if self._map.cell(v.x, v.y) == Block.T_TOP:
-                    block = Block.CROSSROAD
-                else:
-                    block = Block.T_BOTTOM
-            else:
-                if self._map.cell(v.x, v.y) == Block.T_BOTTOM:
-                    block = Block.CROSSROAD
-                else:
-                    block = Block.T_TOP
-        else:
-            if u.x < v.x:
-                if self._map.cell(v.x, v.y) == Block.T_LEFT:
-                    block = Block.CROSSROAD
-                else:
-                    block = Block.T_RIGHT
-            else:
-                if self._map.cell(v.x, v.y) == Block.T_RIGHT:
-                    block = Block.CROSSROAD
-                else:
-                    block = Block.T_LEFT
-
-        self._map.update(v.x, v.y, block)
-
-        self._pavements[f'{v.x}x{v.y}]'] = v
-
     def _fix_road(self, w: int, h: int) -> None:
-        if randint(0, 1):
-            self._fix_vline(self._crossroads[0].x, 0, self._crossroads[1].y)
-            self._fix_vline(self._crossroads[1].x, self._crossroads[0].y, h)
-        else:
-            self._fix_vline(self._crossroads[0].x, self._crossroads[0].y, h)
-            self._fix_vline(self._crossroads[1].x, 0, self._crossroads[1].y)
+        x = self._crossroads[0].x
+        y = 0
 
         if randint(0, 1):
-            self._fix_hline(self._crossroads[0].y, 0, self._crossroads[1].x)
-            self._fix_hline(self._crossroads[1].y, self._crossroads[0].x, w)
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                y < self._crossroads[0].y
+            ):
+                y += 1
+
+            self._fix_corner_t2b(x, y)
+            self._fix_vline(x, y + 1, h)
         else:
-            self._fix_hline(self._crossroads[0].y, self._crossroads[0].x, w)
-            self._fix_hline(self._crossroads[1].y, 0, self._crossroads[1].x)
+            y = h - 1
 
-    def _fix_crossroad(self, w: int, h: int) -> None:
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                y > self._crossroads[1].y
+            ):
+                y -= 1
 
-        for x in vx:
-            for y in vy:
-                self._map.update(x, y, Block.CROSSROAD)
+            self._fix_corner_b2t(x, y)
+            self._fix_vline(x, 0, y)
+
+        x = self._crossroads[1].x
+        y = 0
+
+        if randint(0, 1):
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                y < self._crossroads[0].y
+            ):
+                y += 1
+
+            self._fix_corner_t2b(x, y)
+            self._fix_vline(x, y + 1, h)
+        else:
+            y = h - 1
+
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                y > self._crossroads[1].y
+            ):
+                y -= 1
+
+            self._fix_corner_b2t(x, y)
+            self._fix_vline(x, 0, y)
+
+        x = 0
+        y = self._crossroads[0].y
+
+        if randint(0, 1):
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                x < self._crossroads[0].x
+            ):
+                x += 1
+
+            self._fix_corner_l2r(x, y)
+            self._fix_hline(y, x + 1, w)
+        else:
+            x = w - 1
+
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                x > self._crossroads[1].x
+            ):
+                x -= 1
+
+            self._fix_corner_r2l(x, y)
+            self._fix_hline(y, 0, x)
+
+        x = 0
+        y = self._crossroads[1].y
+
+        if randint(0, 1):
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                x < self._crossroads[0].x
+            ):
+                x += 1
+
+            self._fix_corner_l2r(x, y)
+            self._fix_hline(y, x + 1, w)
+        else:
+            x = w - 1
+
+            while (
+                self._map.cell(x, y) == Block.BLOCK and
+                x > self._crossroads[1].x
+            ):
+                x -= 1
+
+            self._fix_corner_r2l(x, y)
+            self._fix_hline(y, 0, x)
 
     def _fix_street(self):
         for src in self._buildings:
             pathes = [
-                self.find(src, dst) for dst in (
-                    Node(Vertex(src.x, self._crossroads[0].y)),
-                    Node(Vertex(src.x, self._crossroads[1].y)),
-                    Node(Vertex(self._crossroads[0].x, src.y)),
-                    Node(Vertex(self._crossroads[1].x, src.y))
+                self._map.find_path(src, dst) for dst in (
+                    Vertex(src.x, self._crossroads[0].y),
+                    Vertex(src.x, self._crossroads[1].y),
+                    Vertex(self._crossroads[0].x, src.y),
+                    Vertex(self._crossroads[1].x, src.y)
                 )
             ]
 
@@ -335,92 +457,35 @@ class Zone:
                 elif len(path) == cost:
                     index = index if randint(0, 1) else i
 
-            self._fix_path(pathes[index])
+            path = pathes[index]
 
-#            if index < 2:
-#                if src.y < self._axis_y[index]:
-#                    self._facing.append(Facing.SOUTH)
-#                else:
-#                    self._facing.append(Facing.NORTH)
-#            else:
-#                if src.x < self._axis_x[index - 2]:
-#                    self._facing.append(Facing.EAST)
-#                else:
-#                    self._facing.append(Facing.WEST)
+            self._fix_lane(path)
+            src.facing = self._check_facing(path[0], path[1])
+            self._fix_path(path)
 
-    def publish(self) -> None:
-        cache: Mapping[str, str] = {}
-        room_component = self._components['room']
-        exit_component = self._components['exit']
+    def _fix_vline(self, x: int, s: int, d: int) -> None:
+        for y in range(s, d):
+            if self._map.empty(x - 1, y):
+                if self._map.empty(x + 1, y):
+                    self._map.update(x, y, Block.STREET_V)
+                else:
+                    self._map.update(x, y, Block.T_LEFT)
+            else:
+                if self._map.empty(x + 1, y):
+                    self._map.update(x, y, Block.T_RIGHT)
+                else:
+                    self._map.update(x, y, Block.CROSSROAD)
 
-        for n in (*self._buildings, *self._pavements.values()):
-            entity = Entity.eid()
-            cache[f'{n.x}x{n.y}'] = entity
-            room_component.update(
-                entity,
-                self._entity_component.text(
-                    self._map.cell(n.x, n.y).name.lower()
-                )
-            )
+    def _on_axis(self, x: int, y: int) -> bool:
+        on = True
 
-        for v in self._pavements.values():
-            exits = {}
+        for v in self._crossroads:
+            if x == v.x or y == v.y:
+                break
+        else:
+            on = False
 
-            for i, vec in enumerate((
-                Vertex(0, -1), Vertex(-1, 0), Vertex(0, 1), Vertex(1, 0)
-            )):
-                x = v.x + vec.x
-                y = v.y + vec.y
-
-                if (
-                    x < 0 or
-                    x >= self._map.width or
-                    y < 0 or
-                    y >= self._map.height
-                ):
-                    continue
-
-                if self._map.cell(x, y) == Block.BLOCK:
-                    continue
-
-                try:
-                    exits['nwse'[i]] = cache[f'{x}x{y}']
-                except KeyError:
-                    print(f'KeyError: x {x} y {y} {"nwse"[i]} {self._map.cell(x, y).name}')
-
-            exit_component.update(cache[f'{v.x}x{v.y}'], exits)
-
-        for i, n in enumerate(self._buildings):
-            room = cache[f'{n.x}x{n.y}']
-
-#            if self._facing[i] == '^':
-#                exit_component.update(
-#                    room,
-#                    { 'n': cache[f'{n.x}x{n.y - 1}'] }
-                #)
-#            elif self._facing[i] == '<':
-#                exit_component.update(
-#                    room,
-#                    { 'w': cache[f'{n.x - 1}x{n.y}'] }
-#                )
-#            elif self._facing[i] == 'v':
-#                exit_component.update(
-#                    room,
-#                    { 's': cache[f'{n.x}x{n.y + 1}'] }
-#                )
-#            elif self._facing[i] == '>':
-#                exit_component.update(
-#0                    room,
-#                    { 'e': cache[f'{n.x + 1}x{n.y}'] }
-#                )
-#            else:
-#                print(f'Panic! Facing error!')
-
-#        for key, value in self._components.items():
-#            value.save(key)
-
-    def mini_map(self) -> str:
-        return str(self)
+        return on
 
     def __repr__(self) -> str:
         return str(self._map)
@@ -430,7 +495,5 @@ if __name__ == '__main__':
     zone.publish()
 
     print(zone.mini_map())
-    print(f'01234567890123456789012345')
-    print(f'0         1         2')
 
 # builder.py

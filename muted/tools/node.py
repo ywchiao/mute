@@ -48,7 +48,4 @@ class Node:
     def y(self) -> int:
         return self._vertex.y
 
-    def __eq__(self, other: Node) -> bool:
-        return self.vertex == other.vertex
-
 # node.py

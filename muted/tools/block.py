@@ -1,4 +1,8 @@
 
+from __future__ import annotations
+
+from typing import Tuple
+
 from enum import Enum
 
 class Block(Enum):
@@ -51,5 +55,22 @@ class Block(Enum):
     GATE = '≙'
     TOWN = '⋔'
     TARGET = '⌖'
+
+PASSABLE: Tuple[Block] = (
+    Block.BARREN,
+    Block.CORNER_NE,
+    Block.CORNER_NW,
+    Block.CORNER_SE,
+    Block.CORNER_SW,
+    Block.CROSSROAD,
+    Block.STREET_H,
+    Block.STREET_V,
+    Block.T_BOTTOM,
+    Block.T_LEFT,
+    Block.T_RIGHT,
+    Block.T_TOP,
+    Block.GRASSLAND,
+    Block.HILL
+)
 
 # block.py

@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+from component.component import Component
 from component.list_component import ListComponent
 from component.text_component import TextComponent
 from component.value_component import ValueComponent
@@ -40,6 +41,10 @@ class Stats:
     @staticmethod
     def list_remove(component: str, entity: str, value: str) -> None:
         ListComponent.instance(component).remove(entity, value)
+
+    @staticmethod
+    def save(component: str) -> None:
+        Component.instance(component).save(component)
 
     @staticmethod
     def update_text(component: str, entity: str, value: str) -> None:
