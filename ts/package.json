@@ -1,0 +1,21 @@
+{
+  "name": "mute",
+  "version": "0.0.1",
+  "description": "A mud client for Muted.",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && electron ./dist/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mud",
+    "Electron",
+    "typescript"
+  ],
+  "author": "Yiwei Chiao",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^5.0.4",
+    "typescript": "^3.5.2"
+  }
+}
