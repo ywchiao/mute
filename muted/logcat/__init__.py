@@ -5,7 +5,7 @@ import json
 import logging
 import logging.config
 
-from config.config import CONFIG
+from config import CONFIG
 
 config = Path(CONFIG.LOG_CONFIG)
 
